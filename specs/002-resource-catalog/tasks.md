@@ -181,39 +181,39 @@ problem details.
 
 ### Tests
 
-- [ ] T026 [US1] Api.Tests references TestSupport (project reference; the dependency-rule test
+- [x] T026 [US1] Api.Tests references TestSupport (project reference; the dependency-rule test
   for Api.Tests is unaffected); a `ResourceApiFactory` that points the app at a fresh
   migrated database in the container
-- [ ] T027 [P] [US1] `CreateResourceTests`: 201 with `Location` and the stored resource;
+- [x] T027 [P] [US1] `CreateResourceTests`: 201 with `Location` and the stored resource;
   absent description → null; duplicate by case and by surrounding whitespace → 409 problem
   details; missing, blank and over-long name and over-long description → 400
   `ValidationProblemDetails` naming each field; empty body, malformed JSON and wrong JSON
   types → 400 problem details
-- [ ] T028 [P] [US2] `GetResourceTests`: 200; unknown id → 404; retired id (retired through raw
+- [x] T028 [P] [US2] `GetResourceTests`: 200; unknown id → 404; retired id (retired through raw
   SQL) → 404; non-numeric id → 404 problem details
-- [ ] T029 [P] [US3] `ListResourcesTests`: defaults; 100 resources page as 50 and 50 with
+- [x] T029 [P] [US3] `ListResourcesTests`: defaults; 100 resources page as 50 and 50 with
   `totalCount` 100 (SC-002); a page past the end is 200 and empty with the true total;
   non-numeric and out-of-range `page` and `pageSize` → 400 naming the parameter; retired
   resources excluded; order by name case-insensitively
-- [ ] T030 [P] [US1] `ConcurrentCreateTests`: two simultaneous requests creating one name give
+- [x] T030 [P] [US1] `ConcurrentCreateTests`: two simultaneous requests creating one name give
   exactly one 201 and one 409 and no 5xx, repeated at least 10 times (SC-003)
-- [ ] T031 [P] [US1] `ErrorShapeTests`: every error response in T027 to T029 is
+- [x] T031 [P] [US1] `ErrorShapeTests`: every error response in T027 to T029 is
   `application/problem+json`, with no HTML and no stack trace (SC-004)
-- [ ] T032 [P] [US1] `OpenApiTests`: the Development OpenAPI document lists `/resources` and
+- [x] T032 [P] [US1] `OpenApiTests`: the Development OpenAPI document lists `/resources` and
   `/resources/{id}`
 
 ### Implementation
 
-- [ ] T033 [US1] `src/BookingApi.Api/Features/Resources/`: the endpoint group (`POST`, `GET {id}`,
+- [x] T033 [US1] `src/BookingApi.Api/Features/Resources/`: the endpoint group (`POST`, `GET {id}`,
   `GET`), request and response DTOs, mapping of the use-case outcomes to the contract's
   statuses and bodies, field errors to `ValidationProblem`, `Location` header
-- [ ] T034 [US1] Register the three handlers in `Program.cs` (the composition root) and map the
+- [x] T034 [US1] Register the three handlers in `Program.cs` (the composition root) and map the
   group; malformed bodies and bad query values answer through the baseline problem-details
   pipeline (a framework default that answers differently is fixed here)
-- [ ] T035 `specs/002-resource-catalog/quickstart.md`: apply the migration to the local
+- [x] T035 `specs/002-resource-catalog/quickstart.md`: apply the migration to the local
   `BookingApi` database with the pinned tool, run the API, create and list a resource with
   `curl.exe`, and verify the table and constraints with `sqlcmd` (SC-005 by hand)
-- [ ] T036 `specs/002-resource-catalog/rollback.md`: one revert per phase, newest first;
+- [x] T036 `specs/002-resource-catalog/rollback.md`: one revert per phase, newest first;
   the migration's `down` only while the table is empty, else leave the table (data-model.md)
 
 **Checkpoint**: gate green with Docker running; the owner verifies SC-005 by hand.

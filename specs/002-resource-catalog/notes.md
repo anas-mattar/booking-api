@@ -123,3 +123,26 @@ passed), on the code of commit `6c08402` (phase 3) - anas.m, 2026-10-19. CI on `
 
 Gate 3 re-certified after the remediation (user-run): the same command, `EXIT: 0` (91 of 91 tests
 passed), on commit `107a872` (phase 3 remediation; phase 3 is `6c08402`) - anas.m, 2026-10-19.
+
+## Phase 4
+
+- **Test-first**: the Api tests were run before any endpoint existed: 38 of 56 failed (the 18 that
+  passed are the existing scaffold tests). After implementation: 56 Api tests, 134 across the
+  solution.
+- **Framework default fixed in Api (plan, Design Notes: API)**: in Development, minimal APIs
+  throw on a bad request, and the exception handler turned that into a 500. Production already
+  answered 400. `Program.cs` now sets `RouteHandlerOptions.ThrowOnBadRequest = false` in every
+  environment; a Development test pins it.
+- **`page` and `pageSize` are bound as text** and parsed by the endpoint, so a non-numeric value
+  is a 400 that names the parameter (the contract), not the framework's generic binding failure.
+  A value outside the int range is also a 400 naming the parameter. The OpenAPI document
+  therefore shows both parameters as strings.
+- **Outcome mapping**: every outcome subtype is mapped explicitly and the fall-through arm
+  throws (phase 2 review F4). Nothing can reach that arm today, so no test covers it.
+- **Tests**: the HTTP tests share the phase 3 container fixture through
+  `ResourceApiFactory`, which forces a fresh migrated database and a forced connection string
+  (a developer's user secrets never reach the gate). Api.Tests declares its own
+  `SqlServerCollection` (xUnit v2).
+- **`quickstart.md`** targets PowerShell 7: the `curl.exe` JSON bodies use its native-argument
+  quoting (checked: backslash-escaped quotes would be sent literally). The quickstart itself
+  has not been run against the owner's LocalDB database; that is the owner's SC-005 check.

@@ -16,6 +16,18 @@ public class OpenApiTests
     }
 
     [Fact]
+    public async Task DevelopmentListsTheResourceEndpoints()
+    {
+        using var factory = new ApiFactory("Development");
+        using var client = factory.CreateClient();
+
+        var text = await client.GetStringAsync("/openapi/v1.json");
+
+        Assert.Contains("\"/resources\"", text);
+        Assert.Contains("\"/resources/{id}\"", text);
+    }
+
+    [Fact]
     public async Task ProductionDoesNotServeTheDocument()
     {
         using var factory = new ApiFactory("Production");
