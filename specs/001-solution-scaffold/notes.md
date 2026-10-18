@@ -56,3 +56,18 @@ built, 4 of 4 tests passed), on commit `5ded1b0` (phase 1 is `9c9fa5f`) - anas.m
 Gate 3 certified (user-run): `dotnet build BookingApi.slnx --warnaserror && dotnet test
 BookingApi.slnx --no-build` run by anas.m from the repository root, `EXIT: 0` (8 of 8 tests
 passed), on commit `3efa791` (phase 2 is `7e4debb`) - anas.m, 2026-10-18.
+
+## Phase 3
+
+- **Test-first**: the four new cases (unknown route and unhandled exception, each in
+  Development and Production) failed before `src/BookingApi.Api/Errors/` existed (4 failed,
+  5 passed), and passed after (9 of 9). The reviewer additionally removed `UseExceptionHandler`
+  and `UseStatusCodePages` in turn: the 500 tests and the 404 tests failed respectively, so
+  each test guards the line it is named for. Both files were restored.
+- **Review F1 (MINOR, open)**: the `" at "` stack-trace assertion is a heuristic; the real
+  500 body is exactly `type`, `title`, `status`, `traceId`. A later test can assert that
+  property set structurally.
+- **Review F2 (MINOR, open, outside phase 3)**: `POST /health` answers 200, since
+  `MapHealthChecks` has no verb restriction. Not HTML or a stack trace, so SC-003 holds.
+- **Review F4 (MINOR)**: SC-003 is demonstrated for 404 and 500 only; no 400 path exists yet.
+  The first feature with request validation proves it for 400.
