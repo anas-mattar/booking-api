@@ -71,3 +71,9 @@ passed), on commit `3efa791` (phase 2 is `7e4debb`) - anas.m, 2026-10-18.
   `MapHealthChecks` has no verb restriction. Not HTML or a stack trace, so SC-003 holds.
 - **Review F4 (MINOR)**: SC-003 is demonstrated for 404 and 500 only; no 400 path exists yet.
   The first feature with request validation proves it for 400.
+
+### Phase 3 gate certification
+
+Gate 3 certified (user-run): `dotnet build BookingApi.slnx --warnaserror && dotnet test
+BookingApi.slnx --no-build` run by anas.m from the repository root, `EXIT: 0` (12 of 12 tests
+passed), on commit `a90c52f` (phase 3 is `1fda1ee`) - anas.m, 2026-10-18.
