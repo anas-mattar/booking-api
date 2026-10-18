@@ -68,3 +68,12 @@ passed), on commit `8e71df6` (phase 1 is `d5d4abb`, remediation `763fe1c`) - ana
 Gate 3 certified (user-run): `dotnet build BookingApi.slnx --warnaserror && dotnet test
 BookingApi.slnx --no-build` run by anas.m from the repository root, `EXIT: 0` (64 of 64 tests
 passed), on commit `47d7d27` (phase 2 is `b4efceb`, remediation `1493236`) - anas.m, 2026-10-18.
+
+### Decisions after the phase 1 review (owner, 2026-10-19)
+
+- **CK_Resources_Name_Trimmed amended** (phase 1 review F2): `data-model.md` now uses
+  `DATALENGTH(Name) = DATALENGTH(LTRIM(RTRIM(Name))) AND LEN(Name) > 0`, which rejects
+  leading, trailing and all-space names; tab and no-break-space padding stays the domain's
+  job. Amended by the owner (anas.m, 2026-10-19), before the migration that relies on it.
+- **Empty description kept as given** (phase 1 review F5): `""` is stored as `""`. Pinned by a
+  Domain test.
