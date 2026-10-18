@@ -139,3 +139,9 @@ survived (F1).
 
 Remediation needs a new gate run before phase 2 is certified again (the earlier `EXIT: 0` covers
 `b8ac1aa`).
+
+### Phase 2 gate re-certification
+
+Gate 3 re-certified after the remediation (user-run, Critical: human-executed): the same command,
+`EXIT: 0` (229 of 229 tests passed), on commit `b0b2665` (phase 2 is `b8ac1aa`, remediation `b0b2665`) -
+anas.m, 2026-10-19.
