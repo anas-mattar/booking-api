@@ -155,12 +155,15 @@ None. This feature introduces no domain entities.
 - **SC-001**: The gate (`docs/sdlc/gate-command.md`) exits 0 on a machine with no SQL Server
   available.
 - **SC-002**: With LocalDB running and the connection string configured, `GET /health/ready`
-  returns 200; with LocalDB stopped, it returns 503 within 5 seconds.
+  returns 200; with the database unreachable (for example taken offline), it returns 503
+  within 5 seconds.
 - **SC-003**: Every response from the endpoints in this spec, including errors, is either a
   health status or an RFC 9457 problem details body — zero HTML or stack-trace responses in
   the test suite.
 - **SC-004**: The approved `plan.md` records the architecture ADR-style (options considered,
   decision, consequences), and the code layout after merge matches it.
+
+**Amendment approved by**: anas.m, 2026-10-18
 
 ## Assumptions
 

@@ -71,4 +71,6 @@ Both endpoints are safe and idempotent `GET`s.
 ## Audit
 
 Not audited: probe traffic carries no business meaning. Failed readiness checks are logged
-at Warning, without the connection string.
+by the framework (`DefaultHealthCheckService`) at Error level, without the connection string.
+
+**Amendment approved by**: anas.m, 2026-10-18

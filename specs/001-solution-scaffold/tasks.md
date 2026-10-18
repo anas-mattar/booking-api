@@ -153,7 +153,8 @@ details without message or stack trace, also in Development.
 `GET /health/ready` per contract; the owner can verify against real LocalDB.
 
 **Independent Test**: stubbed ready check Healthy → 200, Unhealthy → 503 with body
-`Unhealthy` only; by hand per `quickstart.md`: LocalDB up → 200, stopped → 503 within 5 s.
+`Unhealthy` only; by hand per `quickstart.md`: database up → 200, unreachable (taken
+offline) → 503 within 5 s.
 
 **Territory**:
 
@@ -180,7 +181,11 @@ details without message or stack trace, also in Development.
   `DbSet`, no migrations (FR-009)
 - [x] T023 [US2] `src/BookingApi.Infrastructure/DependencyInjection.cs` — `AddInfrastructure`
   registers the context from connection string `BookingApi` and `AddDbContextCheck` tagged
-  `ready` with a 5 s timeout; logs failures at Warning without the connection string
+  `ready` with a 5 s timeout; failures are logged by the framework at Error, without the
+  connection string
+
+**Amendment approved by**: anas.m, 2026-10-18
+
 - [x] T024 [US2] Api: call `AddInfrastructure` in `Program.cs`; map `/health/ready` running
   only `ready` checks; `dotnet user-secrets init` on `BookingApi.Api` (adds `UserSecretsId`)
 - [x] T025 [US2] `specs/001-solution-scaffold/quickstart.md`: create the empty `BookingApi`
