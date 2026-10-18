@@ -35,3 +35,18 @@ built, 4 of 4 tests passed), on commit `5ded1b0` (phase 1 is `9c9fa5f`) - anas.m
   phase 2 as T026 by an owner-approved `tasks.md` amendment (anas.m, 2026-10-18).
 - **F5 (doc drift) left open**: the backend rulebook's MUST bullet omits the "Api references
   Infrastructure for registration only" exception, which the bullet above it states.
+
+## Phase 2
+
+- **Test-first (review F8)**: the tests were written and run before the implementation:
+  `LivenessReturnsHealthyAsPlainText` and `DevelopmentServesTheDocumentAndListsHealth` failed
+  (2 failed, 4 passed). The two dependency-rule tests and the Production-404 test passed
+  already, since phase 1 satisfied them; they are guards, not new behaviour. After `/health`
+  was mapped, only the OpenAPI test still failed, because `MapHealthChecks` endpoints are
+  not in the generated OpenAPI document (tasks T013 anticipated this). A document
+  transformer now adds `/health` to it, keeping the plan's `MapHealthChecks` mechanism.
+- **Review F1 (MINOR, open)**: the transformer hand-writes the `/health` entry, the test only
+  checks the substring, and the entry declares no `text/plain` content. To tighten in a later
+  phase (share the route constant, assert the content type).
+- **Review F5 (MINOR, open)**: `HealthEndpoints` and `HealthOpenApi` are public and could be
+  internal. Optional.
