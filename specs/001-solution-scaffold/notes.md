@@ -50,3 +50,9 @@ built, 4 of 4 tests passed), on commit `5ded1b0` (phase 1 is `9c9fa5f`) - anas.m
   phase (share the route constant, assert the content type).
 - **Review F5 (MINOR, open)**: `HealthEndpoints` and `HealthOpenApi` are public and could be
   internal. Optional.
+
+### Phase 2 gate certification
+
+Gate 3 certified (user-run): `dotnet build BookingApi.slnx --warnaserror && dotnet test
+BookingApi.slnx --no-build` run by anas.m from the repository root, `EXIT: 0` (8 of 8 tests
+passed), on commit `3efa791` (phase 2 is `7e4debb`) - anas.m, 2026-10-18.
