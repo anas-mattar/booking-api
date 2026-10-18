@@ -103,3 +103,11 @@ local failure, not as a defect found. If it recurs, capture the failing test nam
   used the informal name `ResourceNotFound`. `ListSlotsHandler` reuses the paging constants of
   `ListResourcesHandler`. The port states the phase 1 review follow-ups F2 and F3: instants arrive as
   UTC values from `TimeSlot.Create`, and retired slots are invisible and never block.
+
+### Phase 2 gate certification
+
+Gate 3 certified (user-run, Critical: human-executed): `dotnet build BookingApi.slnx --warnaserror &&
+dotnet test BookingApi.slnx --no-build` run by anas.m from the repository root, `EXIT: 0` (227 of 227
+tests passed), on the phase 2 code of commit `b8ac1aa` (branch tip `f1a3fc4` when run) - anas.m,
+2026-10-19. Recorded before the phase 2 AI review returned: any code change that review causes needs a
+new gate run.
