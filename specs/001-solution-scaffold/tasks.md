@@ -99,6 +99,11 @@ otherwise.
 - [ ] T010 [P] [US1] `HealthEndpointTests`: `GET /health` → 200, `text/plain`, body `Healthy`
 - [ ] T011 [P] [US4] `OpenApiTests`: `GET /openapi/v1.json` → 200 in Development and lists
   `/health`; → 404 in Production
+- [ ] T026 [P] `DependencyRuleTests` in `BookingApi.Api.Tests`, reading the `.csproj` files as
+  the phase 1 rule tests do (phase 1 review F2): Infrastructure references only Application;
+  Api references only Application and Infrastructure
+
+**Amendment approved by**: anas.m, 2026-10-18
 
 ### Implementation
 
