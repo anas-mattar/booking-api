@@ -2,7 +2,7 @@
 
 **Feature Branch**: `001-solution-scaffold`  
 **Created**: 2026-10-18  
-**Status**: Draft  
+**Status**: Approved  
 **Delivery Level**: Standard
 **Rationale Rule**: 1
 **Input**: User description: "Solution scaffold: select and record the booking-api architecture (ADR in plan.md) and lay down the empty layered solution it implies. Scope chosen by the owner: skeleton plus database readiness — remove the template sample, liveness and readiness health endpoints, RFC 9457 problem details, an OpenAPI document in Development, API-test infrastructure, and the database connection wired with no tables and no migrations."
