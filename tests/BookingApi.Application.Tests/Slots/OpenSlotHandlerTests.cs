@@ -39,6 +39,15 @@ public class OpenSlotHandlerTests
         Assert.Equal(0, _slots.AddCalls);
     }
 
+    [Fact]
+    public async Task AnUnknownResourceWinsOverInvalidInstants()
+    {
+        // Precedence is pinned: the resource is checked before the instants are validated.
+        var outcome = await Handler().HandleAsync(new OpenSlotCommand(999, At(10), At(9)), default);
+
+        Assert.IsType<OpenSlotResourceNotFound>(outcome);
+    }
+
     [Theory]
     [InlineData(10, 9)]   // end before start
     [InlineData(9, 9)]    // empty interval

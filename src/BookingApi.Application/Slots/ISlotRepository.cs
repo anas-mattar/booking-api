@@ -31,7 +31,10 @@ public interface ISlotRepository
     /// <c>Id</c> to the SAME instance that was passed in: the caller returns that instance, and the
     /// API builds its <c>Location</c> header and body from it. Answers
     /// <see cref="AddSlotResult.Overlaps"/> when the store itself refuses the interval, which covers
-    /// a concurrent insert that slipped past <see cref="OverlapExistsAsync"/>.
+    /// a concurrent insert that slipped past <see cref="OverlapExistsAsync"/>; in that case nothing
+    /// is stored and the instance keeps <c>Id</c> 0. If the resource is gone by the time of the insert
+    /// (the foreign key refuses), that is an unexpected store failure and propagates as an exception:
+    /// no resource can be retired or deleted in this feature, so it is not an expected outcome.
     /// </summary>
     Task<AddSlotResult> AddAsync(TimeSlot slot, CancellationToken cancellationToken);
 

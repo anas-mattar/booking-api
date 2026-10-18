@@ -22,6 +22,16 @@ public class ListSlotsHandlerTests
     }
 
     [Fact]
+    public async Task AnUnknownResourceWinsOverInvalidPaging()
+    {
+        // Precedence is pinned: the resource is checked before the paging parameters are validated.
+        var outcome = await Handler().HandleAsync(999, 0, 0, default);
+
+        Assert.IsType<ListSlotsResourceNotFound>(outcome);
+        Assert.Null(_slots.LastListRequest);
+    }
+
+    [Fact]
     public async Task NoParametersMeansPageOneOfFifty()
     {
         var resourceId = await AddResourceAsync(_resources);

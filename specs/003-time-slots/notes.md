@@ -111,3 +111,31 @@ dotnet test BookingApi.slnx --no-build` run by anas.m from the repository root, 
 tests passed), on the phase 2 code of commit `b8ac1aa` (branch tip `f1a3fc4` when run) - anas.m,
 2026-10-19. Recorded before the phase 2 AI review returned: any code change that review causes needs a
 new gate run.
+
+### Phase 2 review (fresh-context agent)
+
+Verdict APPROVE with follow-ups, no blocker or major finding; all five invariants walked item by item in
+`ai-code-review-phase2.md` (invariant 2 respected through `TimeSlot.Create`; 1 prepared by the overlap
+check and the port's store guarantee; 5 prepared by the resource check; 3 and 4 cannot yet be exercised,
+no booking exists). Twelve handler mutations by the reviewer: ten caught, one did not compile, two
+survived (F1).
+
+- **F1 fixed**: the order "resource check, then validation" was not pinned. Two tests now pin it
+  (`AnUnknownResourceWinsOverInvalidInstants`, `AnUnknownResourceWinsOverInvalidPaging`); swapping the
+  order in Open or in List fails one test each. 66 Application tests. The API stays uneven by design:
+  unparsable text is a 400 before any handler runs, while an end not after the start for an unknown
+  resource is a 404.
+- **F2 fixed (docs on the port)**: on `Overlaps` nothing is stored and the instance keeps `Id` 0; a
+  resource that vanishes between the check and the insert (foreign key refusal) is an unexpected store
+  failure and propagates, not an outcome, because nothing in this feature can retire or delete a
+  resource.
+- **F3 (carry to phase 3)**: the fake is looser than the port (canned list page, no refusal of an
+  overlap on add, no retired rows). T019, T020, T021 on real SQL Server must prove those rules.
+- **F4 (DOC DRIFT, owner decision)**: `plan.md` and `tasks.md` name the outcome `ResourceNotFound`; the
+  code has `OpenSlotResourceNotFound`, `GetSlotResourceNotFound`, `ListSlotsResourceNotFound`. Fixing
+  the approved documents is an amendment needing the owner's approver record; not made.
+- **F5, F6 (accepted)**: phase 1 follow-ups F2 and F3 are handled; the test-first claim rests on the
+  agent's report because the skeleton was never committed.
+
+Remediation needs a new gate run before phase 2 is certified again (the earlier `EXIT: 0` covers
+`b8ac1aa`).
