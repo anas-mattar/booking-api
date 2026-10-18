@@ -188,6 +188,12 @@ details without message or stack trace, also in Development.
   (`Server=(localdb)\MSSQLLocalDB;Database=BookingApi;Trusted_Connection=True;Connect Timeout=5`),
   verify readiness up and down (SC-002)
 
+- [ ] T027 [US2] Pin `System.Security.Cryptography.Pkcs` 10.0.13 in `BookingApi.Infrastructure`
+  to clear the transitive advisories that fail `--warnaserror` (plan, Packages; removal
+  condition recorded there). Done together with T021.
+
+**Amendment approved by**: anas.m, 2026-10-18
+
 **Checkpoint**: gate green with no SQL Server; owner verifies SC-002 by hand.
 
 ---

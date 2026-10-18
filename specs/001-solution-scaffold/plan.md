@@ -97,6 +97,17 @@ database rulebook, Setup)
 | `Microsoft.AspNetCore.Mvc.Testing` | 10.0.13 | BookingApi.Api.Tests | 2 |
 | `Microsoft.EntityFrameworkCore.SqlServer` | 10.0.13 | BookingApi.Infrastructure | 4 |
 | `Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore` | 10.0.13 | BookingApi.Infrastructure | 4 |
+| `System.Security.Cryptography.Pkcs` | 10.0.13 | BookingApi.Infrastructure | 4 |
+
+The last row is a **pin of a transitive dependency**, not a feature dependency. EF Core's
+SQL Server provider (10.0.13, the latest) pulls `System.Security.Cryptography.Pkcs` 9.0.11,
+which carries advisories GHSA-2fmv-rv2c-59x7 (moderate) and GHSA-846f-f764-76mx (high); under
+`--warnaserror` they fail the gate (`docs/sdlc/gate-command.md`, strict-build flags, triage
+step 2). The pin overrides the vulnerable resolution; no code references the package.
+**Removal condition**: delete the pin once the provider's own dependency graph resolves a
+patched `System.Security.Cryptography.Pkcs` (check on each EF Core upgrade).
+
+**Amendment approved by**: anas.m, 2026-10-18
 
 Kept from the adoption scaffold: `Microsoft.AspNetCore.OpenApi` (Api) and the `dotnet new
 xunit` set (each test project). No other package is approved.
