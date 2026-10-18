@@ -75,22 +75,22 @@ outcome explicit.
 
 ### Tests
 
-- [ ] T006 [P] [US1] `CreateResourceHandlerTests` against a fake repository and a controllable
+- [x] T006 [P] [US1] `CreateResourceHandlerTests` against a fake repository and a controllable
   `TimeProvider`: valid input → `Created` carrying the stored resource with the clock's
   instants; invalid input → `Invalid` with the field errors and nothing added; name already
   present → `Duplicate` and nothing added; repository answers `Duplicate` on add (the race)
   → `Duplicate`
-- [ ] T007 [P] [US2] `GetResourceHandlerTests`: existing id → `Found`; unknown id → `NotFound`
-- [ ] T008 [P] [US3] `ListResourcesHandlerTests`: no parameters → page 1, size 50; `page` below 1
+- [x] T007 [P] [US2] `GetResourceHandlerTests`: existing id → `Found`; unknown id → `NotFound`
+- [x] T008 [P] [US3] `ListResourcesHandlerTests`: no parameters → page 1, size 50; `page` below 1
   or `pageSize` outside 1 to 100 → `Invalid` naming the parameter; valid parameters reach the
   repository unchanged; the result carries items, page, page size and total count
 
 ### Implementation
 
-- [ ] T009 [US1] `src/BookingApi.Application/Resources/`: `IResourceRepository` (add, get by
+- [x] T009 [US1] `src/BookingApi.Application/Resources/`: `IResourceRepository` (add, get by
   id, list a page, name exists) and the page type
-- [ ] T010 [US1] The explicit outcome types for the three use cases
-- [ ] T011 [US1] `CreateResourceHandler`, `GetResourceHandler`, `ListResourcesHandler`
+- [x] T010 [US1] The explicit outcome types for the three use cases
+- [x] T011 [US1] `CreateResourceHandler`, `GetResourceHandler`, `ListResourcesHandler`
 
 **Checkpoint**: gate green; Application still references only Domain and no framework package.
 
