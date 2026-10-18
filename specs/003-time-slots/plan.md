@@ -2,7 +2,7 @@
 
 **Branch**: `003-time-slots` | **Date**: 2026-10-19 | **Spec**: `specs/003-time-slots/spec.md`
 **Input**: Feature specification from `specs/003-time-slots/spec.md`
-**Status**: Draft
+**Status**: Approved
 **Gate Batching**: none
 **Gate Certification**: user-run
 **Merge Readiness**: pending
