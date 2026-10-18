@@ -30,6 +30,7 @@ Status flow: `idea → specified → in progress → shipped → dropped`
 | Feature | Covers (Inv #) | Priority | Status | Owner | Spec |
 |---|---|---|---|---|---|
 | Solution scaffold (architecture ADR in plan.md) | — | P1 | shipped | anas.m | `specs/001-solution-scaffold/` |
+| Resource catalog (create, get, list; first migration) | — | P1 | in progress | anas.m | `[specs/002-resource-catalog/]` |
 
 ## Decisions log *(authored)*
 
@@ -38,3 +39,7 @@ Status flow: `idea → specified → in progress → shipped → dropped`
 - 2026-10-18 Feature 001-solution-scaffold shipped (PR #4): architecture ADR-001 (Clean
   Architecture, four projects), health endpoints, problem details, EF Core wired to an empty
   context. Next features are sequenced by the owner; none is claimed.
+- 2026-10-18 Feature 002-resource-catalog claimed: the first domain entity (Resource) and the
+  first migration. Sequence chosen by the owner: resources, then time slots, then bookings
+  (reads before writes; the booking invariants are exercised only by the last). Critical
+  surfaces are not declared yet; revisit when booking logic arrives.
