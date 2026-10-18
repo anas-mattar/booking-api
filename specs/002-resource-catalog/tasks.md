@@ -118,47 +118,47 @@ exercise every constraint, the query filter, paging and a concurrent duplicate.
 
 ### Tests
 
-- [ ] T012 [US1] Create `tests/BookingApi.TestSupport` (class library; `Testcontainers.MsSql`
+- [x] T012 [US1] Create `tests/BookingApi.TestSupport` (class library; `Testcontainers.MsSql`
   4.16.0): a collection fixture that starts one SQL Server container per test assembly and a
   helper that creates a uniquely named database in it and returns its connection string;
   add to `BookingApi.slnx`
-- [ ] T013 [US1] Create `tests/BookingApi.Infrastructure.Tests` (xUnit; references
+- [x] T013 [US1] Create `tests/BookingApi.Infrastructure.Tests` (xUnit; references
   Infrastructure and TestSupport only); add to `BookingApi.slnx`; its `DependencyRuleTests`
   assert TestSupport references no BookingApi project and Infrastructure.Tests references only
   Infrastructure and TestSupport
-- [ ] T014 [P] [US1] `MigrationTests`: `Migrate()` applies to an empty database; migrating back
+- [x] T014 [P] [US1] `MigrationTests`: `Migrate()` applies to an empty database; migrating back
   to zero returns it to empty (SC-005)
-- [ ] T015 [P] [US1] `ConstraintTests` (raw SQL, so the database itself must refuse): an
+- [x] T015 [P] [US1] `ConstraintTests` (raw SQL, so the database itself must refuse): an
   untrimmed or blank name; a name over 100 or a description over 500 characters; a retired
   row without its deletion data; `UpdatedAtUtc` before `CreatedAtUtc`
-- [ ] T016 [P] [US1] `ResourceRepositoryTests`: add then get round-trips every field; a name
+- [x] T016 [P] [US1] `ResourceRepositoryTests`: add then get round-trips every field; a name
   differing only by case collides (`Duplicate`); the same name is allowed once the earlier
   holder is retired (row retired through raw SQL)
-- [ ] T017 [P] [US2] `ResourceRepositoryTests`: retired rows are invisible to get, list and the
+- [x] T017 [P] [US2] `ResourceRepositoryTests`: retired rows are invisible to get, list and the
   name-exists check (query filter)
-- [ ] T018 [P] [US3] `ResourceRepositoryTests`: 100 inserted resources page as 50 and 50, each
+- [x] T018 [P] [US3] `ResourceRepositoryTests`: 100 inserted resources page as 50 and 50, each
   exactly once, ordered by name case-insensitively then id; a page past the end is empty with
   the true total; an offset beyond the int range is an empty page, not an overflow
-- [ ] T019 [P] [US1] `ResourceRepositoryTests`: many parallel adds of one name yield exactly
+- [x] T019 [P] [US1] `ResourceRepositoryTests`: many parallel adds of one name yield exactly
   one success and the rest `Duplicate`, never an exception (SC-003, database half)
 
 ### Implementation
 
-- [ ] T020 [US1] Add `Microsoft.EntityFrameworkCore.Design` 10.0.13 (`PrivateAssets=all`) to
+- [x] T020 [US1] Add `Microsoft.EntityFrameworkCore.Design` 10.0.13 (`PrivateAssets=all`) to
   Infrastructure and the pinned `dotnet-ef` 10.0.13 local tool manifest
   (`.config/dotnet-tools.json`)
-- [ ] T021 [US1] Fluent mapping per `data-model.md`: table `Resources`, column types, filtered
+- [x] T021 [US1] Fluent mapping per `data-model.md`: table `Resources`, column types, filtered
   unique index `IX_Resources_Name`, the three check constraints, global query filter; add the
   `DbSet` to `BookingDbContext`
-- [ ] T022 [US1] `ResourceRepository` implementing the port; `AsNoTracking()` reads; unique-index
+- [x] T022 [US1] `ResourceRepository` implementing the port; `AsNoTracking()` reads; unique-index
   violations (SQL Server errors 2601 and 2627) mapped to `Duplicate`; paging in 64-bit
   arithmetic
-- [ ] T023 [US1] Design-time `IDesignTimeDbContextFactory<BookingDbContext>` (scaffolding only)
+- [x] T023 [US1] Design-time `IDesignTimeDbContextFactory<BookingDbContext>` (scaffolding only)
   and the generated migration `ResourceCatalog`; read the generated SQL against
   `data-model.md` before committing
-- [ ] T024 [US1] Register the repository in `AddInfrastructure`; liveness and readiness stay
+- [x] T024 [US1] Register the repository in `AddInfrastructure`; liveness and readiness stay
   unchanged
-- [ ] T025 Record the Docker prerequisite in `CLAUDE.md` (Stack Profile, known failure modes),
+- [x] T025 Record the Docker prerequisite in `CLAUDE.md` (Stack Profile, known failure modes),
   `README.md`, the backend rulebook (Testing) and the database rulebook (Setup: tests use
   throwaway containers and never the developer's `BookingApi` LocalDB database)
 

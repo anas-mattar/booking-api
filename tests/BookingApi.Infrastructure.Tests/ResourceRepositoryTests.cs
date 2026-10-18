@@ -46,12 +46,28 @@ public class ResourceRepositoryTests(SqlServerFixture sql) : DatabaseTest(sql)
         Assert.Equal("Room A", loaded.Name);
         Assert.Equal("Ground floor", loaded.Description);
         Assert.Equal(Instant.UtcDateTime, loaded.CreatedAtUtc);
+        Assert.Equal(DateTimeKind.Utc, loaded.CreatedAtUtc.Kind);
+        Assert.Equal(DateTimeKind.Utc, loaded.UpdatedAtUtc.Kind);
         Assert.Equal("anonymous", loaded.CreatedBy);
         Assert.Equal(Instant.UtcDateTime, loaded.UpdatedAtUtc);
         Assert.Equal("anonymous", loaded.UpdatedBy);
         Assert.False(loaded.IsDeleted);
         Assert.Null(loaded.DeletedAtUtc);
         Assert.Null(loaded.DeletedBy);
+    }
+
+    [Fact]
+    public async Task ARetiredRowReadWithoutTheFilterKeepsItsDeletionInstantAsUtc()
+    {
+        var resource = NewResource("Retired");
+        await AddAsync(resource);
+        await RetireAsync("Retired");
+
+        await using var context = NewContext();
+        var loaded = await context.Resources.IgnoreQueryFilters().AsNoTracking().SingleAsync(r => r.Id == resource.Id);
+
+        Assert.True(loaded.IsDeleted);
+        Assert.Equal(DateTimeKind.Utc, loaded.DeletedAtUtc!.Value.Kind);
     }
 
     [Fact]
@@ -116,8 +132,9 @@ public class ResourceRepositoryTests(SqlServerFixture sql) : DatabaseTest(sql)
     [Fact]
     public async Task OneHundredResourcesPageAsFiftyAndFiftyEachExactlyOnceInOrder()
     {
-        // Mixed case so the case-insensitive ordering is what is being asserted.
-        for (var i = 0; i < 100; i++)
+        // Mixed case so the case-insensitive ordering is what is being asserted, inserted in
+        // descending name order so that ordering by Id instead of by name would fail.
+        for (var i = 99; i >= 0; i--)
         {
             await AddAsync(NewResource(i % 2 == 0 ? $"res {i:D3}" : $"RES {i:D3}"));
         }

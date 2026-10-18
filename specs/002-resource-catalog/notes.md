@@ -95,8 +95,8 @@ passed), on commit `47d7d27` (phase 2 is `b4efceb`, remediation `1493236`) - ana
 - **Reviewer mutation checks** (9 applied, restored): 7 caught (`IgnoreQueryFilters` on each of the
   three reads, int offset arithmetic, `Skip` off by one, duplicate mapping removed, query filter
   removed from the mapping); 2 survived (below).
-- **Review F1 (open, minor)**: the paging test inserts names in ascending order, so ordering by
-  `Id` instead of `Name, Id` still passes. Insert names shuffled or descending.
+- **Review F1 (fixed in remediation)**: the paging test inserts names in ascending order, so ordering by
+  `Id` instead of `Name, Id` still passes. Names are now inserted in descending order; the reviewer's `OrderBy(Id)` mutation fails it.
 - **Review F2 (accepted)**: error 2627 is unreachable with a filtered unique index (SQL Server
   raises 2601); it is mapped because T022 names both.
 - **Review F3 (accepted)**: `ListAsync` counts and pages in two statements; a concurrent insert
@@ -104,12 +104,13 @@ passed), on commit `47d7d27` (phase 2 is `b4efceb`, remediation `1493236`) - ana
 - **Review F4 (open, minor)**: the test image tag floats (`2022-latest`).
 - **Review F5 (nits)**: undisposed context in `MigrationTests`; BOM dropped from the Infrastructure
   csproj; the over-length constraint tests assert only `SqlException`.
-- **OPEN (found while writing these notes, not by the review): the UTC converter promised in
+- **FIXED in remediation (found while writing these notes, not by the review): the UTC converter promised in
   phase 1 note F7 was not added.** Rows read back have `Kind` Unspecified; the round-trip test
   uses `Assert.Equal` on `DateTime`, which ignores `Kind`, so it cannot see this. Phase 4 would
   serialize the instants without a `Z`. Fix: a value converter (or `DateTime.SpecifyKind`) on
-  the four UTC columns plus a test asserting `Kind == Utc`. Needs a decision on whether it
-  lands as a phase 3 remediation or in phase 4.
+  the four UTC columns plus a test asserting `Kind == Utc`. Owner approved landing it as a phase 3 remediation (anas.m, 2026-10-19): value
+  converters on `CreatedAtUtc`, `UpdatedAtUtc`, `DeletedAtUtc`; tests assert `Kind == Utc` (seen
+  failing first); `has-pending-model-changes` reports no change, so the migration is untouched.
 - **Size**: the phase commit is 826 lines in 23 files, over the enforcement-pack's 400/15
   guideline (warning only).
 
