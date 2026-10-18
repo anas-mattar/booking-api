@@ -18,3 +18,9 @@ never costs an approval.
 - **Review F1/F2 (owner decisions pending)**: the dependency-rule tests read `.csproj` XML
   rather than `GetReferencedAssemblies()` as T001/T002 word it, and the Infrastructure and Api
   rules of ADR-001 have no test.
+
+### Phase 1 gate certification
+
+Gate 3 certified (user-run): `dotnet build BookingApi.slnx --warnaserror && dotnet test
+BookingApi.slnx --no-build` run by anas.m from the repository root, `EXIT: 0` (7 projects
+built, 4 of 4 tests passed), on commit `5ded1b0` (phase 1 is `9c9fa5f`) - anas.m, 2026-10-18.
