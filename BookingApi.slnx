@@ -9,5 +9,7 @@
     <Project Path="tests/BookingApi.Api.Tests/BookingApi.Api.Tests.csproj" />
     <Project Path="tests/BookingApi.Application.Tests/BookingApi.Application.Tests.csproj" />
     <Project Path="tests/BookingApi.Domain.Tests/BookingApi.Domain.Tests.csproj" />
+    <Project Path="tests/BookingApi.Infrastructure.Tests/BookingApi.Infrastructure.Tests.csproj" />
+    <Project Path="tests/BookingApi.TestSupport/BookingApi.TestSupport.csproj" />
   </Folder>
 </Solution>

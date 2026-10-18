@@ -1,4 +1,6 @@
+using BookingApi.Application.Resources;
 using BookingApi.Infrastructure.Data;
+using BookingApi.Infrastructure.Resources;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +25,8 @@ public static class DependencyInjection
         // test hosts can override configuration before it is read.
         services.AddDbContext<BookingDbContext>((provider, options) =>
             options.UseSqlServer(provider.GetRequiredService<IConfiguration>().GetConnectionString(ConnectionStringName)));
+
+        services.AddScoped<IResourceRepository, ResourceRepository>();
 
         services.AddHealthChecks()
             .AddDbContextCheck<BookingDbContext>(DatabaseCheckName, tags: [ReadyTag]);

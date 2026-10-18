@@ -20,6 +20,9 @@ force.
   another project points the first `migration apply` at an existing database, mixing
   schemas the moment it runs.
 - Local development runs on SQL Server LocalDB (`(localdb)\MSSQLLocalDB`).
+- Tests run against throwaway SQL Server containers (Testcontainers; Docker must be running)
+  and never against the developer's `BookingApi` LocalDB database: each test creates its own
+  uniquely named database in the container and applies the real migrations.
 
 ## Schema Standards
 
