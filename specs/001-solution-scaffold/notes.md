@@ -105,3 +105,9 @@ passed), on commit `a90c52f` (phase 3 is `1fda1ee`) - anas.m, 2026-10-18.
   request took about 5.4 s end to end; failures log `message '(null)'`; the quickstart's
   DROP DATABASE has no "only if you created it" guard and its connection string carries
   `TrustServerCertificate=True`.
+
+### Phase 4 gate certification
+
+Gate 3 certified (user-run): `dotnet build BookingApi.slnx --warnaserror && dotnet test
+BookingApi.slnx --no-build` run by anas.m from the repository root, `EXIT: 0` (16 of 16 tests
+passed), on commit `96a6b68` (phase 4 is `6f4a5cb`) - anas.m, 2026-10-18.
