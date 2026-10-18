@@ -28,9 +28,11 @@ application checks them first, the database refuses what slips through.
 | Name | Definition | Mirrors |
 |---|---|---|
 | `IX_Resources_Name` | unique index on `Name` where `IsDeleted = 0` | spec FR-002: unique among non-retired resources; the database's default case-insensitive collation makes it case-insensitive |
-| `CK_Resources_Name_Trimmed` | `Name = LTRIM(RTRIM(Name)) AND LEN(Name) > 0` | spec FR-001: trimmed and not blank |
+| `CK_Resources_Name_Trimmed` | `DATALENGTH(Name) = DATALENGTH(LTRIM(RTRIM(Name))) AND LEN(Name) > 0` | spec FR-001: no leading or trailing spaces, not blank. SQL Server's `LTRIM` and `RTRIM` trim plain spaces only, and `=` ignores trailing spaces (which is why the check compares byte lengths), so this constraint guards spaces. Tabs, no-break spaces and other Unicode whitespace are trimmed by the domain (`Resource.Create`), which is their only guard |
 | `CK_Resources_Deleted_Consistent` | `(IsDeleted = 0 AND DeletedAtUtc IS NULL AND DeletedBy IS NULL) OR (IsDeleted = 1 AND DeletedAtUtc IS NOT NULL AND DeletedBy IS NOT NULL)` | soft-delete standard: a retired row records when and by whom |
 | `CK_Resources_Updated_NotBeforeCreated` | `UpdatedAtUtc >= CreatedAtUtc` | audit trail coherence |
+
+**Amendment approved by**: anas.m, 2026-10-19
 
 Length limits are the column types (`nvarchar(100)`, `nvarchar(500)`): the database rejects
 longer values rather than truncating.
