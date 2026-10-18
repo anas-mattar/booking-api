@@ -62,3 +62,9 @@ passed), on commit `8e71df6` (phase 1 is `d5d4abb`, remediation `763fe1c`) - ana
 - **Review F6 remainder (open, minor)**: no test for a null command; `ResourcePage` can
   express page 0 or a mutable item list. Left as is: the API only builds commands from
   parsed requests, and the page type is only built by the repository and handlers.
+
+### Phase 2 gate certification
+
+Gate 3 certified (user-run): `dotnet build BookingApi.slnx --warnaserror && dotnet test
+BookingApi.slnx --no-build` run by anas.m from the repository root, `EXIT: 0` (64 of 64 tests
+passed), on commit `47d7d27` (phase 2 is `b4efceb`, remediation `1493236`) - anas.m, 2026-10-18.
