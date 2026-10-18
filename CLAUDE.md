@@ -8,7 +8,7 @@ SDLC workflow with Spec Kit documents. Do not implement everything at once.
 ```text
 Backend: .NET 10 / ASP.NET Core Web API (minimal-API template) → this repository
   Runtime / package manager: .NET SDK 10.0.400 (global.json, rollForward latestFeature); NuGet
-  Source roots: src/BookingApi/ (API), tests/BookingApi.Tests/ (xUnit)
+  Source roots: src/BookingApi.{Domain,Application,Infrastructure,Api}/, tests/BookingApi.*.Tests/ (xUnit)
   Build: dotnet build BookingApi.slnx --warnaserror     Test: dotnet test BookingApi.slnx --no-build
   Gate slice: the whole gate — docs/sdlc/gate-command.md
   Dependency policy: no new NuGet package without plan.md approval (constitution IV)
