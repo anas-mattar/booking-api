@@ -29,7 +29,7 @@ Status flow: `idea → specified → in progress → shipped → dropped`
 
 | Feature | Covers (Inv #) | Priority | Status | Owner | Spec |
 |---|---|---|---|---|---|
-| Solution scaffold (architecture ADR in plan.md) | — | P1 | idea | anas.m | — |
+| Solution scaffold (architecture ADR in plan.md) | — | P1 | in progress | anas.m | `[specs/001-solution-scaffold/]` |
 
 ## Decisions log *(authored)*
 
