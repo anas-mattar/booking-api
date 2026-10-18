@@ -2,7 +2,7 @@
 
 **Feature Branch**: `002-resource-catalog`  
 **Created**: 2026-10-18  
-**Status**: Draft  
+**Status**: Approved  
 **Delivery Level**: Standard
 **Rationale Rule**: 1
 **Input**: User description: "Resource catalog: the first domain entity. A Resource (name, description, active flag) with create, get-by-id and list endpoints; the first EF Core migration with audit and soft-delete columns per the database rulebook."
