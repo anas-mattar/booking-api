@@ -45,17 +45,17 @@ hand-worked answer for every boundary case; nothing else in the solution is need
 
 ### Tests
 
-- [ ] T001 [P] [US1] `TimeSlotTests`: `Create` with a valid start and end sets `StartUtc`,
+- [x] T001 [P] [US1] `TimeSlotTests`: `Create` with a valid start and end sets `StartUtc`,
   `EndUtc` and the resource id; an offset instant (`2026-11-02T11:00:00+02:00`) is stored as
   `2026-11-02T09:00:00Z`; the stored instants have `Kind` Utc
-- [ ] T002 [P] [US1] `TimeSlotTests`: an end equal to the start, one tick before it, and a whole
+- [x] T002 [P] [US1] `TimeSlotTests`: an end equal to the start, one tick before it, and a whole
   hour before it are each rejected with one `endUtc` error; an end one tick after the start is
   accepted; the offset is normalized before the comparison (`10:00+02:00` is before `09:00Z`'s
   end of `09:30Z`)
-- [ ] T003 [P] [US1] `TimeSlotTests`: a valid `Create` sets `CreatedAtUtc` and `UpdatedAtUtc` to the
+- [x] T003 [P] [US1] `TimeSlotTests`: a valid `Create` sets `CreatedAtUtc` and `UpdatedAtUtc` to the
   given instant and `CreatedBy` and `UpdatedBy` to `anonymous`; the new slot is not retired
   (`IsDeleted` false, `DeletedAtUtc` and `DeletedBy` null)
-- [ ] T004 [P] [US1] `SlotIntervalTests`: the overlap predicate on the hand-worked table (A =
+- [x] T004 [P] [US1] `SlotIntervalTests`: the overlap predicate on the hand-worked table (A =
   `[09:00, 10:00)`): `[10:00, 11:00)` no; `[08:00, 09:00)` no; `[09:00, 10:00)` identical yes;
   `[09:15, 09:45)` contained yes; `[08:00, 11:00)` containing yes; `[09:30, 10:30)` partial yes;
   `[08:30, 09:30)` partial yes; `[11:00, 12:00)` disjoint no; one-tick overlap
@@ -64,11 +64,11 @@ hand-worked answer for every boundary case; nothing else in the solution is need
 
 ### Implementation
 
-- [ ] T005 [US1] `src/BookingApi.Domain/TimeSlot.cs`: the entity (private constructor, read-only
+- [x] T005 [US1] `src/BookingApi.Domain/TimeSlot.cs`: the entity (private constructor, read-only
   properties including the retirement marker) and the field-name constants `startUtc` and `endUtc`
-- [ ] T006 [US1] `TimeSlot.Create(resourceId, start, end, now)` returning the entity or the field
+- [x] T006 [US1] `TimeSlot.Create(resourceId, start, end, now)` returning the entity or the field
   errors, reusing the existing `ValidationError` and a result type in Domain (no package)
-- [ ] T007 [US1] The half-open overlap predicate in one place (`start < otherEnd && otherStart <
+- [x] T007 [US1] The half-open overlap predicate in one place (`start < otherEnd && otherStart <
   end`) used by `TimeSlot` and by the tests
 
 **Checkpoint**: tests written first and seen failing; Domain still references no project and no
