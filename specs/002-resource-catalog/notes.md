@@ -164,3 +164,10 @@ endpoints and `Program.cs` were caught; one survived (`NumberStyles.Any`), one m
   fall-through arms are unreachable, so untested; tasks T026-T036 were ticked in the phase commit,
   before the gate (phase 3 ticked after); OpenAPI shows `page` and `pageSize` as strings
   (contract-driven, recorded above).
+
+### Phase 4 gate certification
+
+Gate 3 certified (user-run): `dotnet build BookingApi.slnx --warnaserror && dotnet test
+BookingApi.slnx --no-build` run by anas.m from the repository root, `EXIT: 0` (140 of 140 tests
+passed), on commit `e34c7ca` (phase 4 is `a42f69b`, remediation `e34c7ca`) - anas.m, 2026-10-19.
+Still owner-only: the SC-005 by-hand check (`quickstart.md`) and the feature-level human review.
