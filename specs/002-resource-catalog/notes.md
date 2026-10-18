@@ -77,3 +77,45 @@ passed), on commit `47d7d27` (phase 2 is `b4efceb`, remediation `1493236`) - ana
   job. Amended by the owner (anas.m, 2026-10-19), before the migration that relies on it.
 - **Empty description kept as given** (phase 1 review F5): `""` is stored as `""`. Pinned by a
   Domain test.
+
+## Phase 3
+
+- **Test-first**: the Infrastructure tests were run before the migration existed: 20 of 25 failed
+  (the 5 that passed need no table: dependency rules and the constraint-free cases). The
+  container, database creation and connection worked end to end. After the migration: 25
+  Infrastructure tests, 90 across the solution.
+- **Migration read against `data-model.md`**: columns, types, `PK_Resources`, the filtered unique
+  index `IX_Resources_Name` and the three named check constraints match, including the amended
+  `CK_Resources_Name_Trimmed`; `Down` drops the table (lawful only while empty).
+- **Implementation choices**: `MsSqlBuilder()` without an image is obsolete under `--warnaserror`,
+  so the fixture pins `mcr.microsoft.com/mssql/server:2022-latest`. Databases are created with
+  `ExecScriptAsync` inside the container because no SQL client package is approved for
+  TestSupport. xUnit v2 needs the collection definition in each test assembly, so phase 4's
+  Api.Tests declares its own. TestSupport sets `IsTestProject=false` so `dotnet test` skips it.
+- **Reviewer mutation checks** (9 applied, restored): 7 caught (`IgnoreQueryFilters` on each of the
+  three reads, int offset arithmetic, `Skip` off by one, duplicate mapping removed, query filter
+  removed from the mapping); 2 survived (below).
+- **Review F1 (open, minor)**: the paging test inserts names in ascending order, so ordering by
+  `Id` instead of `Name, Id` still passes. Insert names shuffled or descending.
+- **Review F2 (accepted)**: error 2627 is unreachable with a filtered unique index (SQL Server
+  raises 2601); it is mapped because T022 names both.
+- **Review F3 (accepted)**: `ListAsync` counts and pages in two statements; a concurrent insert
+  can make them disagree. No consistency promise is made by the contract.
+- **Review F4 (open, minor)**: the test image tag floats (`2022-latest`).
+- **Review F5 (nits)**: undisposed context in `MigrationTests`; BOM dropped from the Infrastructure
+  csproj; the over-length constraint tests assert only `SqlException`.
+- **OPEN (found while writing these notes, not by the review): the UTC converter promised in
+  phase 1 note F7 was not added.** Rows read back have `Kind` Unspecified; the round-trip test
+  uses `Assert.Equal` on `DateTime`, which ignores `Kind`, so it cannot see this. Phase 4 would
+  serialize the instants without a `Z`. Fix: a value converter (or `DateTime.SpecifyKind`) on
+  the four UTC columns plus a test asserting `Kind == Utc`. Needs a decision on whether it
+  lands as a phase 3 remediation or in phase 4.
+- **Size**: the phase commit is 826 lines in 23 files, over the enforcement-pack's 400/15
+  guideline (warning only).
+
+### Phase 3 gate certification
+
+Gate 3 certified (user-run): `dotnet build BookingApi.slnx --warnaserror && dotnet test
+BookingApi.slnx --no-build` run by anas.m from the repository root, `EXIT: 0` (90 of 90 tests
+passed), on the code of commit `6c08402` (phase 3) - anas.m, 2026-10-19. CI on `6c08402`:
+`project-gate` and `ritual-checks` both green.
