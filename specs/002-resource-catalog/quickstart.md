@@ -37,12 +37,13 @@ In a second PowerShell window (`curl.exe`, not the `curl` alias):
 
 ```powershell
 curl.exe -i -X POST http://localhost:5132/resources -H "Content-Type: application/json" -d '{"name":"Room A","description":"Ground floor, seats 8"}'
-curl.exe -i http://localhost:5132/resources/1
+curl.exe -i http://localhost:5132/resources/<id>
 curl.exe -i http://localhost:5132/resources
 curl.exe -i "http://localhost:5132/resources?page=1&pageSize=1"
 ```
 
-Expect `201 Created` with `Location: /resources/1` and a body with `id`, `name`, `description`,
+Expect `201 Created` with `Location: /resources/<id>` (`1` on an empty table; use the id you got in
+place of `<id>` below) and a body with `id`, `name`, `description`,
 `createdAtUtc` and `updatedAtUtc` (instants end in `Z`); `200` for the get; `200` with
 `items`, `page`, `pageSize` and `totalCount` for the lists.
 

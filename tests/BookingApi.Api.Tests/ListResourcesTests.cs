@@ -65,6 +65,11 @@ public class ListResourcesTests(SqlServerFixture sql) : ResourceApiTest(sql)
     [InlineData("pageSize=0", "pageSize")]
     [InlineData("pageSize=101", "pageSize")]
     [InlineData("pageSize=", "pageSize")]
+    [InlineData("page=%201", "page")]
+    [InlineData("page=1%20", "page")]
+    [InlineData("page=%2B1", "page")]
+    [InlineData("pageSize=%2B5", "pageSize")]
+    [InlineData("pageSize=1e1", "pageSize")]
     public async Task AnInvalidOrNonNumericParameterIs400NamingIt(string query, string parameter)
     {
         var response = await Client.GetAsync($"/resources?{query}");
@@ -76,12 +81,24 @@ public class ListResourcesTests(SqlServerFixture sql) : ResourceApiTest(sql)
     [Fact]
     public async Task BothParametersCanBeInvalidAtOnce()
     {
-        var response = await Client.GetAsync("/resources?page=0&pageSize=abc");
+        var response = await Client.GetAsync("/resources?page=abc&pageSize=abc");
 
         AssertProblem(response, HttpStatusCode.BadRequest);
         var errors = (await JsonAsync(response)).GetProperty("errors");
         Assert.True(errors.TryGetProperty("page", out _));
         Assert.True(errors.TryGetProperty("pageSize", out _));
+    }
+
+    [Fact]
+    public async Task AnUnparsableParameterIs400WithoutTouchingTheDatabase()
+    {
+        // A bad request must never become a 500 because the store is down.
+        using var offline = new ResourceApiFactoryOffline();
+        using var client = offline.CreateClient();
+
+        var response = await client.GetAsync("/resources?page=abc");
+
+        AssertProblem(response, HttpStatusCode.BadRequest);
     }
 
     [Fact]

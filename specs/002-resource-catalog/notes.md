@@ -146,3 +146,21 @@ passed), on commit `107a872` (phase 3 remediation; phase 3 is `6c08402`) - anas.
 - **`quickstart.md`** targets PowerShell 7: the `curl.exe` JSON bodies use its native-argument
   quoting (checked: backslash-escaped quotes would be sent literally). The quickstart itself
   has not been run against the owner's LocalDB database; that is the owner's SC-005 check.
+
+### Phase 4 review (fresh-context agent)
+
+Verdict APPROVE with follow-ups, no blocker or major finding. Eight of ten mutations of the
+endpoints and `Program.cs` were caught; one survived (`NumberStyles.Any`), one matched nothing.
+
+- **F1 fixed**: `page` and `pageSize` are digits only (`NumberStyles.None`); a sign, a space or an
+  exponent is a 400 naming the parameter. Tests pin `%2B1`, `%201`, `1%20` and `1e1`.
+- **F2 fixed (a flaw of the phase 4 commit)**: an unparsable parameter no longer reaches the
+  handler, so a bad request cannot become a 500 when the store is down (test against an
+  unreachable connection string). The trade-off: when a parameter does not parse, only the
+  unparsable parameters are named; the range of the other is checked once they are fixed.
+  `page=abc&pageSize=abc` still names both.
+- **F6 fixed**: `quickstart.md` uses the id from `Location` instead of a hard-coded `1`.
+- **F3, F4, F5 (accepted or left)**: the concurrency test was not mutation-tested and the throwing
+  fall-through arms are unreachable, so untested; tasks T026-T036 were ticked in the phase commit,
+  before the gate (phase 3 ticked after); OpenAPI shows `page` and `pageSize` as strings
+  (contract-driven, recorded above).

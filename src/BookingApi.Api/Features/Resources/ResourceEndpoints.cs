@@ -65,12 +65,9 @@ public static class ResourceEndpoints
 
         if (errors.Count > 0)
         {
-            // Still ask the handler about the half that parsed, so one response names every bad parameter.
-            if (await handler.HandleAsync(parsedPage ?? 1, parsedPageSize ?? 1, cancellationToken) is ListResourcesInvalid invalid)
-            {
-                errors.AddRange(invalid.Errors.Where(e => errors.All(known => known.Field != e.Field)));
-            }
-
+            // Answered here, before the handler: a request that cannot be parsed never reaches the
+            // store, so a store failure cannot turn it into a 500. Only the unparsable parameters
+            // are named; the range of the other is checked once these are fixed.
             return ValidationProblem(errors);
         }
 
@@ -88,7 +85,9 @@ public static class ResourceEndpoints
         };
     }
 
-    // An absent parameter is the default; a present one must be a whole number that fits an int.
+    // An absent parameter is the default; a present one must be digits only (no sign, no spaces,
+    // no exponent) and fit an int. A negative number is therefore "not a whole number" here,
+    // still a 400 naming the parameter.
     private static int? ParseWholeNumber(string? text, string field, List<ValidationError> errors)
     {
         if (text is null)
@@ -96,7 +95,7 @@ public static class ResourceEndpoints
             return null;
         }
 
-        if (int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value))
+        if (int.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out var value))
         {
             return value;
         }
