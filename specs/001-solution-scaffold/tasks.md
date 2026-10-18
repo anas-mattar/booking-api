@@ -163,32 +163,32 @@ details without message or stack trace, also in Development.
 
 ### Tests
 
-- [ ] T018 [P] [US2] `ReadinessTests`: replace the `ready`-tagged check with a stub; Healthy →
+- [x] T018 [P] [US2] `ReadinessTests`: replace the `ready`-tagged check with a stub; Healthy →
   200 `Healthy`, Unhealthy → 503 `Unhealthy`
-- [ ] T019 [P] [US2] `ReadinessTests`: with no connection string configured and the real
+- [x] T019 [P] [US2] `ReadinessTests`: with no connection string configured and the real
   check in place, the app starts, `GET /health` → 200 and `GET /health/ready` → 503 with no
   connection or exception text in the body
-- [ ] T020 [P] [US2] `HealthEndpointTests`: liveness stays 200 while the ready check is
+- [x] T020 [P] [US2] `HealthEndpointTests`: liveness stays 200 while the ready check is
   Unhealthy (spec US1 scenario 2)
 
 ### Implementation
 
-- [ ] T021 [US2] Add `Microsoft.EntityFrameworkCore.SqlServer` and
+- [x] T021 [US2] Add `Microsoft.EntityFrameworkCore.SqlServer` and
   `Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore` 10.0.13 to
   `BookingApi.Infrastructure` (plan, Packages)
-- [ ] T022 [US2] `src/BookingApi.Infrastructure/Data/BookingDbContext.cs` — empty context, no
+- [x] T022 [US2] `src/BookingApi.Infrastructure/Data/BookingDbContext.cs` — empty context, no
   `DbSet`, no migrations (FR-009)
-- [ ] T023 [US2] `src/BookingApi.Infrastructure/DependencyInjection.cs` — `AddInfrastructure`
+- [x] T023 [US2] `src/BookingApi.Infrastructure/DependencyInjection.cs` — `AddInfrastructure`
   registers the context from connection string `BookingApi` and `AddDbContextCheck` tagged
   `ready` with a 5 s timeout; logs failures at Warning without the connection string
-- [ ] T024 [US2] Api: call `AddInfrastructure` in `Program.cs`; map `/health/ready` running
+- [x] T024 [US2] Api: call `AddInfrastructure` in `Program.cs`; map `/health/ready` running
   only `ready` checks; `dotnet user-secrets init` on `BookingApi.Api` (adds `UserSecretsId`)
-- [ ] T025 [US2] `specs/001-solution-scaffold/quickstart.md`: create the empty `BookingApi`
+- [x] T025 [US2] `specs/001-solution-scaffold/quickstart.md`: create the empty `BookingApi`
   LocalDB database once, set the user secret
   (`Server=(localdb)\MSSQLLocalDB;Database=BookingApi;Trusted_Connection=True;Connect Timeout=5`),
   verify readiness up and down (SC-002)
 
-- [ ] T027 [US2] Pin `System.Security.Cryptography.Pkcs` 10.0.13 in `BookingApi.Infrastructure`
+- [x] T027 [US2] Pin `System.Security.Cryptography.Pkcs` 10.0.13 in `BookingApi.Infrastructure`
   to clear the transitive advisories that fail `--warnaserror` (plan, Packages; removal
   condition recorded there). Done together with T021.
 
