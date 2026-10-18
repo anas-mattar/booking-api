@@ -2,7 +2,7 @@
 
 **Branch**: `002-resource-catalog` | **Date**: 2026-10-18 | **Spec**: `specs/002-resource-catalog/spec.md`
 **Input**: Feature specification from `specs/002-resource-catalog/spec.md`
-**Status**: Draft
+**Status**: Approved
 **Gate Batching**: none
 **Gate Certification**: user-run
 
