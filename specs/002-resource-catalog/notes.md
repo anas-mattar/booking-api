@@ -29,3 +29,9 @@ never costs an approval.
   code takes `DateTimeOffset now` (converted to UTC inside), which suits
   `TimeProvider.GetUtcNow()`. Phase 3 also needs a UTC converter: EF reads `datetime2` back
   with `Kind` Unspecified.
+
+### Phase 1 gate certification
+
+Gate 3 certified (user-run): `dotnet build BookingApi.slnx --warnaserror && dotnet test
+BookingApi.slnx --no-build` run by anas.m from the repository root, `EXIT: 0` (39 of 39 tests
+passed), on commit `8e71df6` (phase 1 is `d5d4abb`, remediation `763fe1c`) - anas.m, 2026-10-18.
