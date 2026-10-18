@@ -93,13 +93,13 @@ otherwise.
 
 ### Tests
 
-- [ ] T009 [US1] Add `Microsoft.AspNetCore.Mvc.Testing` 10.0.13 to `BookingApi.Api.Tests`
+- [x] T009 [US1] Add `Microsoft.AspNetCore.Mvc.Testing` 10.0.13 to `BookingApi.Api.Tests`
   (plan, Packages); add a `WebApplicationFactory<Program>`-based `ApiFactory` that can set
   the environment
-- [ ] T010 [P] [US1] `HealthEndpointTests`: `GET /health` → 200, `text/plain`, body `Healthy`
-- [ ] T011 [P] [US4] `OpenApiTests`: `GET /openapi/v1.json` → 200 in Development and lists
+- [x] T010 [P] [US1] `HealthEndpointTests`: `GET /health` → 200, `text/plain`, body `Healthy`
+- [x] T011 [P] [US4] `OpenApiTests`: `GET /openapi/v1.json` → 200 in Development and lists
   `/health`; → 404 in Production
-- [ ] T026 [P] `DependencyRuleTests` in `BookingApi.Api.Tests`, reading the `.csproj` files as
+- [x] T026 [P] `DependencyRuleTests` in `BookingApi.Api.Tests`, reading the `.csproj` files as
   the phase 1 rule tests do (phase 1 review F2): Infrastructure references only Application;
   Api references only Application and Infrastructure
 
@@ -107,11 +107,11 @@ otherwise.
 
 ### Implementation
 
-- [ ] T012 [US1] Add `src/BookingApi.Api/Health/` with the liveness mapping
+- [x] T012 [US1] Add `src/BookingApi.Api/Health/` with the liveness mapping
   (`AddHealthChecks`, `MapHealthChecks("/health")` with a predicate that runs no checks)
-- [ ] T013 [US4] Keep `MapOpenApi()` behind `IsDevelopment()`; ensure the health endpoint
+- [x] T013 [US4] Keep `MapOpenApi()` behind `IsDevelopment()`; ensure the health endpoint
   appears in the document
-- [ ] T014 Replace the phase-1 smoke test if it is superseded by the HTTP tests
+- [x] T014 Replace the phase-1 smoke test if it is superseded by the HTTP tests
 
 **Checkpoint**: gate green; US1 and US4 acceptance scenarios covered by tests.
 
