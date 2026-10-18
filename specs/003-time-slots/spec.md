@@ -2,7 +2,7 @@
 
 **Feature Branch**: `003-time-slots`  
 **Created**: 2026-10-19  
-**Status**: Draft  
+**Status**: Approved  
 **Delivery Level**: Critical
 **Rationale Rule**: 1
 **Input**: User description: "Time slots: open a one-off UTC interval [start, end) on a resource so it can later be booked. Create, get and list slots nested under a resource (POST/GET /resources/{resourceId}/slots, GET /resources/{resourceId}/slots/{id}). Slots of one resource must not overlap (half-open, enforced in code and by the database under concurrency). No update or retire in this feature."
