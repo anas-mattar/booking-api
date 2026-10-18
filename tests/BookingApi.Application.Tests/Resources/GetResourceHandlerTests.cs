@@ -9,14 +9,15 @@ public class GetResourceHandlerTests
     private readonly FakeResourceRepository _repository = new();
 
     [Fact]
-    public async Task AnExistingResourceIsFound()
+    public async Task AnExistingResourceIsFoundById()
     {
-        var resource = Resource.Create("Room A", null, DateTimeOffset.UtcNow).Value!;
-        _repository.Stored.Add(resource);
+        var first = await AddAsync("Room A");
+        var second = await AddAsync("Room B");
 
-        var outcome = await new GetResourceHandler(_repository).HandleAsync(resource.Id, default);
+        var outcome = await new GetResourceHandler(_repository).HandleAsync(second.Id, default);
 
-        Assert.Same(resource, Assert.IsType<ResourceFound>(outcome).Resource);
+        Assert.NotEqual(first.Id, second.Id);
+        Assert.Same(second, Assert.IsType<ResourceFound>(outcome).Resource);
     }
 
     [Fact]
@@ -25,5 +26,22 @@ public class GetResourceHandlerTests
         var outcome = await new GetResourceHandler(_repository).HandleAsync(12345, default);
 
         Assert.IsType<ResourceNotFound>(outcome);
+    }
+
+    [Fact]
+    public async Task TheCancellationTokenReachesTheRepository()
+    {
+        using var source = new CancellationTokenSource();
+
+        await new GetResourceHandler(_repository).HandleAsync(1, source.Token);
+
+        Assert.Equal(source.Token, Assert.Single(_repository.Tokens));
+    }
+
+    private async Task<Resource> AddAsync(string name)
+    {
+        var resource = Resource.Create(name, null, DateTimeOffset.UtcNow).Value!;
+        await _repository.AddAsync(resource, default);
+        return resource;
     }
 }

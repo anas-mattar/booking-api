@@ -84,4 +84,14 @@ public class ListResourcesHandlerTests
         Assert.Equal(120, page.TotalCount);
         Assert.Same(items[0], Assert.Single(page.Items));
     }
+
+    [Fact]
+    public async Task TheCancellationTokenReachesTheRepository()
+    {
+        using var source = new CancellationTokenSource();
+
+        await Handler().HandleAsync(1, 10, source.Token);
+
+        Assert.Equal(source.Token, Assert.Single(_repository.Tokens));
+    }
 }

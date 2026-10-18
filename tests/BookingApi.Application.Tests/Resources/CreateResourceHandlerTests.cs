@@ -68,4 +68,36 @@ public class CreateResourceHandlerTests
         Assert.IsType<ResourceNameTaken>(outcome);
         Assert.Equal(1, _repository.AddCalls);
     }
+
+    [Fact]
+    public async Task TheReturnedResourceCarriesTheIdTheStoreAssigned()
+    {
+        var outcome = await Handler().HandleAsync(new CreateResourceCommand("Room A", null), default);
+
+        var created = Assert.IsType<ResourceCreated>(outcome);
+        Assert.True(created.Resource.Id > 0);
+        Assert.Same(created.Resource, Assert.Single(_repository.Stored));
+    }
+
+    [Fact]
+    public async Task TheCancellationTokenReachesTheRepository()
+    {
+        using var source = new CancellationTokenSource();
+
+        await Handler().HandleAsync(new CreateResourceCommand("Room A", null), source.Token);
+
+        Assert.NotEmpty(_repository.Tokens);
+        Assert.All(_repository.Tokens, token => Assert.Equal(source.Token, token));
+    }
+
+    [Fact]
+    public async Task AnUnexpectedStoreFailurePropagates()
+    {
+        _repository.FailWith = new InvalidOperationException("store is down");
+
+        var failure = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => Handler().HandleAsync(new CreateResourceCommand("Room A", null), default));
+
+        Assert.Equal("store is down", failure.Message);
+    }
 }
