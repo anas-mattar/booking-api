@@ -120,3 +120,6 @@ Gate 3 certified (user-run): `dotnet build BookingApi.slnx --warnaserror && dotn
 BookingApi.slnx --no-build` run by anas.m from the repository root, `EXIT: 0` (90 of 90 tests
 passed), on the code of commit `6c08402` (phase 3) - anas.m, 2026-10-19. CI on `6c08402`:
 `project-gate` and `ritual-checks` both green.
+
+Gate 3 re-certified after the remediation (user-run): the same command, `EXIT: 0` (91 of 91 tests
+passed), on commit `107a872` (phase 3 remediation; phase 3 is `6c08402`) - anas.m, 2026-10-19.
