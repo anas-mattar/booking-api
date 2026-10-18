@@ -39,22 +39,22 @@ for invalid input; nothing else in the solution is needed.
 
 ### Tests
 
-- [ ] T001 [P] [US1] `ResourceTests`: `Create` trims the name; accepts names of exactly 1 and
+- [x] T001 [P] [US1] `ResourceTests`: `Create` trims the name; accepts names of exactly 1 and
   exactly 100 characters; rejects blank, whitespace-only and 101-character names; accepts a
   null description and a 500-character one; rejects 501 characters; a whitespace-only
   description is treated as present text, not trimmed away (the contract only trims the name)
-- [ ] T002 [P] [US1] `ResourceTests`: a valid `Create` sets `CreatedAtUtc` and `UpdatedAtUtc`
+- [x] T002 [P] [US1] `ResourceTests`: a valid `Create` sets `CreatedAtUtc` and `UpdatedAtUtc`
   to the given instant and `CreatedBy` and `UpdatedBy` to `anonymous`; the new resource is not
   retired (`IsDeleted` false, `DeletedAtUtc` and `DeletedBy` null)
-- [ ] T003 [P] [US1] `ResourceTests`: invalid input returns one error per invalid field
+- [x] T003 [P] [US1] `ResourceTests`: invalid input returns one error per invalid field
   (`name`, `description`) and collects both when both are invalid; errors are keyed by the
   contract's field names
 
 ### Implementation
 
-- [ ] T004 [US1] `src/BookingApi.Domain/Resource.cs`: the entity (private constructor,
+- [x] T004 [US1] `src/BookingApi.Domain/Resource.cs`: the entity (private constructor,
   read-only properties including the retirement marker) and the limits as named constants
-- [ ] T005 [US1] `Resource.Create(name, description, nowUtc)` returning the entity or the field
+- [x] T005 [US1] `Resource.Create(name, description, nowUtc)` returning the entity or the field
   errors (a small result type in Domain; no package)
 
 **Checkpoint**: gate green; Domain still references no project and no package.
