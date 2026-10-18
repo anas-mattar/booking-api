@@ -12,7 +12,7 @@ public class DependencyRuleTests
         var project = LoadProject("src/BookingApi.Application/BookingApi.Application.csproj");
 
         var references = project.Descendants("ProjectReference")
-            .Select(r => Path.GetFileNameWithoutExtension((string)r.Attribute("Include")!))
+            .Select(r => Path.GetFileNameWithoutExtension(((string)r.Attribute("Include")!).Replace('\\', '/')))
             .ToArray();
 
         Assert.Equal(["BookingApi.Domain"], references);
