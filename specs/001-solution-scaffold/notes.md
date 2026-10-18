@@ -77,3 +77,31 @@ passed), on commit `3efa791` (phase 2 is `7e4debb`) - anas.m, 2026-10-18.
 Gate 3 certified (user-run): `dotnet build BookingApi.slnx --warnaserror && dotnet test
 BookingApi.slnx --no-build` run by anas.m from the repository root, `EXIT: 0` (12 of 12 tests
 passed), on commit `a90c52f` (phase 3 is `1fda1ee`) - anas.m, 2026-10-18.
+
+## Phase 4
+
+- **Test-first**: the three readiness tests failed before the implementation (3 failed,
+  10 passed); the liveness-while-unhealthy test passed already and is a guard. After: 16 of 16
+  tests across three assemblies.
+- **Strict build and a transitive advisory**: adding the EF Core SQL Server provider (10.0.13,
+  the latest) pulled `System.Security.Cryptography.Pkcs` 9.0.11 with advisories
+  GHSA-2fmv-rv2c-59x7 and GHSA-846f-f764-76mx, and `--warnaserror` failed (6 errors).
+  Triage per `docs/sdlc/gate-command.md`: no newer direct dependency exists, so the patched
+  version is pinned (step 2): plan and tasks amended by the owner (anas.m, 2026-10-18,
+  commit e996d3a), T027. A trial of the pin gave 0 errors, 0 warnings.
+- **Real run against LocalDB** (database `BookingApi` not yet created): `/health` 200 in 2 ms;
+  `/health/ready` 503 `Unhealthy` in 2.5 s; unknown route a problem-details 404; no
+  connection string in the logs. The reviewer additionally ran an unroutable host with a 15 s
+  connect timeout: the check was cut at 5.0 s, still 503.
+- **Review F1 (CONFIRM, owner decision pending)**: contract Audit section and T023 say a failed
+  readiness check is logged at Warning. Nothing in the code logs it; the framework's
+  `DefaultHealthCheckService` logs it at Error. No connection string reaches the log.
+- **Review F4 (CONFIRM, owner decision pending)**: spec SC-002 says "with LocalDB stopped"
+  but LocalDB restarts itself on the next connection, so `quickstart.md` takes the database
+  OFFLINE instead. That exercises the fast-fail path, not the 5 s hang (which the reviewer
+  covered with an unroutable host).
+- **Review F2/F3/F5/F6/F7/F8 (MINOR)**: the stub tests register one `ready` check so they
+  cannot detect an over-broad predicate; no test asserts the 5 s timeout; the cold first
+  request took about 5.4 s end to end; failures log `message '(null)'`; the quickstart's
+  DROP DATABASE has no "only if you created it" guard and its connection string carries
+  `TrustServerCertificate=True`.
