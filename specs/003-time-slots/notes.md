@@ -66,3 +66,40 @@ tests passed), on commit `f2a7a77` (phase 1 is `36ad545`, remediation `f2a7a77`)
 The earlier run on `b33164b` (`EXIT: 1`, 2 failures, names not captured) was not reproduced: CI was green
 on that commit and the agent's scoped runs passed, so it is recorded as an unexplained, possibly flaky,
 local failure, not as a defect found. If it recurs, capture the failing test names.
+
+## Phase 2
+
+- **Test-first**: the tests were written against a skeleton whose handlers throw: 37 of 64 Application
+  tests failed (the 27 that passed are the existing Application tests). The real handlers then made
+  all 64 pass. Scoped test runs only (`dotnet test tests/BookingApi.Application.Tests`); the gate
+  command was not run by the agent and no run is presented as certification.
+- **Mutation checks** (ten, restored; the committed source was re-built and re-tested afterwards: 64
+  pass, 0 warnings): removing the overlap check failed 6 tests; swapping the store's `Overlaps` answer
+  for `Opened` failed 1; removing the resource check failed 2; checking overlap on resource 0 failed 6;
+  not forwarding the token to `GetAsync` failed 1 and to `AddAsync` failed 1; a maximum page size of
+  102 failed 1; listing resource 0 failed 4; using the wall clock instead of `TimeProvider` failed 1;
+  removing the validity check failed 2.
+- **Scoped strict build**: `dotnet build src/BookingApi.Application --warnaserror` - 0 warnings,
+  0 errors.
+- **Scope check**: `scope-check: PASS phase 2 commit b8ac1aa (7 file(s))`.
+- **Diff stat** of the phase commit `b8ac1aa`:
+
+  ```text
+   src/BookingApi.Application/Slots/ISlotRepository.cs   |  58 ++++
+   src/BookingApi.Application/Slots/Outcomes.cs          |  32 +++
+   src/BookingApi.Application/Slots/SlotHandlers.cs      |  92 ++++
+   .../Slots/GetSlotHandlerTests.cs                      |  67 +++
+   .../Slots/ListSlotsHandlerTests.cs                    | 121 ++++
+   .../Slots/OpenSlotHandlerTests.cs                     | 154 +++++
+   .../Slots/TestDoubles.cs                              |  99 +++
+   7 files changed, 623 insertions(+)
+  ```
+
+- **Design notes**: the resource is checked before anything else in all three handlers, so an unknown
+  resource is 404 even when the instants or the paging would also be invalid; the API parses and
+  rejects unparsable text before calling a handler (phase 4), so a request that cannot be parsed is 400
+  regardless. The "resource not found" outcome has a type per use case (a record has one base type),
+  named `OpenSlotResourceNotFound`, `GetSlotResourceNotFound`, `ListSlotsResourceNotFound`; plan.md
+  used the informal name `ResourceNotFound`. `ListSlotsHandler` reuses the paging constants of
+  `ListResourcesHandler`. The port states the phase 1 review follow-ups F2 and F3: instants arrive as
+  UTC values from `TimeSlot.Create`, and retired slots are invisible and never block.

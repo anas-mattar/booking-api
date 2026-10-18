@@ -90,32 +90,32 @@ outcome explicit.
 
 ### Tests
 
-- [ ] T008 [P] [US1] `OpenSlotHandlerTests` against fake repositories and a controllable
+- [x] T008 [P] [US1] `OpenSlotHandlerTests` against fake repositories and a controllable
   `TimeProvider`: valid input on an existing resource → `SlotOpened` carrying the stored slot with
   the clock's instants; unknown resource → `ResourceNotFound`, nothing added and no overlap check;
   invalid input (end not after start) → `SlotInvalid` with the `endUtc` error and nothing added;
   an overlapping existing slot → `SlotOverlaps` and nothing added; touching slots → `SlotOpened`;
   the repository answers `Overlaps` on add (the race) → `SlotOverlaps`; the resource id is part of
   the overlap check (a slot on another resource does not block)
-- [ ] T009 [P] [US2] `GetSlotHandlerTests`: existing slot of that resource → `SlotFound`; unknown
+- [x] T009 [P] [US2] `GetSlotHandlerTests`: existing slot of that resource → `SlotFound`; unknown
   slot id → `SlotNotFound`; a slot id that belongs to another resource → `SlotNotFound`; unknown
   resource → `ResourceNotFound`
-- [ ] T010 [P] [US3] `ListSlotsHandlerTests`: unknown resource → `ResourceNotFound` with the
+- [x] T010 [P] [US3] `ListSlotsHandlerTests`: unknown resource → `ResourceNotFound` with the
   repository untouched; no parameters → page 1, size 50; `page` below 1 or `pageSize` outside 1 to
   100 → `Invalid` naming the parameter; valid parameters reach the repository unchanged with the
   resource id; the result carries items, page, page size and total count
-- [ ] T011 [P] [US1] Cancellation-token forwarding for all three handlers and repository-failure
+- [x] T011 [P] [US1] Cancellation-token forwarding for all three handlers and repository-failure
   propagation for open (an exception from the store is not turned into an outcome)
 
 ### Implementation
 
-- [ ] T012 [US1] `src/BookingApi.Application/Slots/`: `ISlotRepository` (overlap exists, add, get by
+- [x] T012 [US1] `src/BookingApi.Application/Slots/`: `ISlotRepository` (overlap exists, add, get by
   resource and id, list a page for a resource) and the page type, with the contract written on the
   port as in feature 002 (the same instance returned with its `Id`; a retired slot is invisible
   and does not block; overlap is the store's guarantee; 64-bit paging; cancellation and unexpected
   failures propagate)
-- [ ] T013 [US1] The explicit outcome types for the three use cases
-- [ ] T014 [US1] `OpenSlotHandler`, `GetSlotHandler`, `ListSlotsHandler` (the paging bounds reuse
+- [x] T013 [US1] The explicit outcome types for the three use cases
+- [x] T014 [US1] `OpenSlotHandler`, `GetSlotHandler`, `ListSlotsHandler` (the paging bounds reuse
   the constants of `ListResourcesHandler`)
 
 **Checkpoint**: tests written first and seen failing; Application still references only Domain and
