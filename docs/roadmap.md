@@ -29,9 +29,12 @@ Status flow: `idea → specified → in progress → shipped → dropped`
 
 | Feature | Covers (Inv #) | Priority | Status | Owner | Spec |
 |---|---|---|---|---|---|
-| Solution scaffold (architecture ADR in plan.md) | — | P1 | in progress | anas.m | `[specs/001-solution-scaffold/]` |
+| Solution scaffold (architecture ADR in plan.md) | — | P1 | shipped | anas.m | `specs/001-solution-scaffold/` |
 
 ## Decisions log *(authored)*
 
 - 2026-10-18 Kit adopted (agentic-sdlc-kit 2d3e5bd). The first feature is the solution
   scaffold, which the greenfield adoption track requires (`adoption/greenfield.md` step 4).
+- 2026-10-18 Feature 001-solution-scaffold shipped (PR #4): architecture ADR-001 (Clean
+  Architecture, four projects), health endpoints, problem details, EF Core wired to an empty
+  context. Next features are sequenced by the owner; none is claimed.
