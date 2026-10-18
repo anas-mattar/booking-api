@@ -33,7 +33,7 @@ public class DependencyRuleTests
         Assert.NotNull(dir);
         return XDocument.Load(Path.Combine(dir.FullName, relativePath))
             .Descendants("ProjectReference")
-            .Select(r => Path.GetFileNameWithoutExtension((string)r.Attribute("Include")!))
+            .Select(r => Path.GetFileNameWithoutExtension(((string)r.Attribute("Include")!).Replace('\\', '/')))
             .Order()
             .ToArray();
     }
