@@ -1,0 +1,32 @@
+# branching pack — law digest (GENERATED)
+
+<!-- GENERATED FILE — do not edit. Regenerate: pwsh -File scripts/build-digests.ps1
+     Non-authoritative: for orientation only. The source documents prevail (constitution
+     II is unchanged); read the full document before acting on its area. -->
+
+- Feature branches are NNN-short-name mapping 1:1 to specs/NNN-short-name/ — never hand-invent a different layout. (`docs/sdlc/branch-strategy.md`)
+- Flip a new claim's roadmap row to in progress in a main-side docs commit — ritual-checks fails while a claim reads idea. (`docs/sdlc/branch-strategy.md`)
+- Claim with scripts/claim-feature.ps1: remote-aware number allocation and an immediate push — the remote is the ledger. (`docs/sdlc/branch-strategy.md`)
+- Lite lane (fix/, chore/, docs/): no spec directory, but the gate, scope check, and human review before merge remain. (`docs/sdlc/branch-strategy.md`)
+- A Lite branch amending an approved spec document owes the amendment record and the approver in the message. (`docs/sdlc/branch-strategy.md`)
+- Four delivery levels in ascending ceremony: Lite < Micro < Standard < Critical; chosen per feature, declared in spec.md. (`docs/sdlc/branch-strategy.md`)
+- Micro: single-page mini-spec, exactly one phase, at most 5 territory files and 400 changed lines, machine-enforced. (`docs/sdlc/branch-strategy.md`)
+- Behavior change is at least Micro; a Micro feature that outgrows a bound promotes in place to Standard, never stretches. (`docs/sdlc/branch-strategy.md`)
+- main is protected: no direct commits, never force-push; merge only after certification and approved human review. (`docs/sdlc/branch-strategy.md`)
+- Push the feature branch before merging; merge --no-ff so the merge commit survives; one commit per phase. (`docs/sdlc/branch-strategy.md`)
+- notes.md holds a feature's evidence; tasks.md holds the agreed work and its completion state alone. (`docs/sdlc/branch-strategy.md`)
+- booking-api is a single repository; adding a second repository needs plan.md approval and re-ratifying principle III. (`docs/sdlc/repository-strategy.md`)
+- Territory entries are plain repository-root paths; scope-check.ps1 grades them, scope-check-repos.ps1 reports n/a. (`docs/sdlc/repository-strategy.md`)
+- Always confirm which repository is active before changing files. (`docs/sdlc/repository-strategy.md`)
+- Every feature has exactly one owner — "the user" means the feature's owner, never a teammate and never the agent. (`docs/sdlc/team-workflow.md`)
+- A remote NNN-* branch IS the claim — check remote branches before picking, never the roadmap alone. (`docs/sdlc/team-workflow.md`)
+- WIP limit: one active feature each; pipelining: one awaiting-review + one active, territory disjoint or sequenced. (`docs/sdlc/team-workflow.md`)
+- WIP counter: more than two active claims per Owner fails, exactly two is noted; graded only where a roster is declared. (`docs/sdlc/team-workflow.md`)
+- The roster catches a stranger or a typo as Owner or Reviewer; it does not prove identity or that a pull request is open. (`docs/sdlc/team-workflow.md`)
+- A Critical reviewer pulls the review (claim-review.ps1); a written claim, not identity. (`docs/sdlc/team-workflow.md`)
+- claim-feature -Row prints an advisory Fit note if a row's Repos exceed yours; it never refuses. (`docs/sdlc/team-workflow.md`)
+- Cross-review: the human reviewer of a feature must not be its owner. (`docs/sdlc/team-workflow.md`)
+- Run territory-check.ps1 before each phase, code repos too; UNGRADED is not clean; overlap is sequenced, never forbidden. (`docs/sdlc/team-workflow.md`)
+- Rebase on main before the final phase's gate, and after any teammate's merge touching your territory. (`docs/sdlc/team-workflow.md`)
+- Governance changes ride alone on a docs/ branch with team-lead approval — never inside a feature branch. (`docs/sdlc/team-workflow.md`)
+- A merge that turns main red is reverted immediately via the fix/ lane — no debugging on a red main. (`docs/sdlc/team-workflow.md`)
