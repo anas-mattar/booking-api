@@ -105,12 +105,37 @@ public class TimeSlotTests
         Assert.Null(slot.DeletedBy);
     }
 
-    [Fact]
-    public void ASlotOverlapsAnIntervalExactlyWhenThePredicateSaysSo()
+    // Hand-worked against the slot [09:00, 10:00) on 2026-11-02; each row would flip if the wrapper
+    // passed the wrong start or end on to the predicate.
+    [Theory]
+    [InlineData(10, 0, 11, 0, false)]  // touching after
+    [InlineData(8, 0, 9, 0, false)]    // touching before
+    [InlineData(9, 0, 10, 0, true)]    // identical
+    [InlineData(9, 15, 9, 45, true)]   // inside
+    [InlineData(8, 0, 11, 0, true)]    // containing
+    [InlineData(9, 30, 10, 30, true)]  // starts inside, ends after
+    [InlineData(8, 0, 9, 30, true)]    // starts before, ends inside
+    [InlineData(11, 0, 12, 0, false)]  // disjoint, later
+    [InlineData(7, 0, 8, 0, false)]    // disjoint, earlier
+    public void ASlotOverlapsAnIntervalExactlyWhenTheHandWorkedTableSaysSo(int startHour, int startMinute, int endHour, int endMinute, bool expected)
     {
         var slot = Create(Nine, Ten).Value!;
+        var start = new DateTime(2026, 11, 2, startHour, startMinute, 0, DateTimeKind.Utc);
+        var end = new DateTime(2026, 11, 2, endHour, endMinute, 0, DateTimeKind.Utc);
 
-        Assert.True(slot.Overlaps(Nine.UtcDateTime.AddMinutes(30), Ten.UtcDateTime.AddMinutes(30)));
-        Assert.False(slot.Overlaps(Ten.UtcDateTime, Ten.UtcDateTime.AddHours(1)));
+        Assert.True(expected == slot.Overlaps(start, end));
+    }
+
+    [Fact]
+    public void ASlotOverlapsOnlyByOneTickAtEitherEnd()
+    {
+        var slot = Create(Nine, Ten).Value!;
+        var nine = Nine.UtcDateTime;
+        var ten = Ten.UtcDateTime;
+
+        Assert.True(slot.Overlaps(ten.AddTicks(-1), ten.AddHours(1)));
+        Assert.False(slot.Overlaps(ten, ten.AddHours(1)));
+        Assert.True(slot.Overlaps(nine.AddHours(-1), nine.AddTicks(1)));
+        Assert.False(slot.Overlaps(nine.AddHours(-1), nine));
     }
 }
