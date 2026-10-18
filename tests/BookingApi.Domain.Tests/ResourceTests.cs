@@ -96,6 +96,7 @@ public class ResourceTests
     [InlineData(null)]
     [InlineData("Ground floor, seats 8")]
     [InlineData("   ")]
+    [InlineData("")]
     public void CreateKeepsTheDescriptionAsGiven(string? description)
     {
         var result = Create("Room A", description);
