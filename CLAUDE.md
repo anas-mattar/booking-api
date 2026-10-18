@@ -19,7 +19,9 @@ Backend: .NET 10 / ASP.NET Core Web API (minimal-API template) → this reposito
 Database: SQL Server — local dev on LocalDB (MSSQLLocalDB); EF Core arrives with the first
   feature that needs persistence (plan-approved). Rules: docs/rulebooks/database-rules.md
   Known failure modes: confirm the connection string targets a booking-api-only database
-                       before the first migration (database rulebook, Setup)
+                       before the first migration (database rulebook, Setup);
+                       the gate needs a running Docker engine (Testcontainers SQL Server
+                       for the database tests) — with Docker down they fail, never skip
 ```
 
 ## The Law

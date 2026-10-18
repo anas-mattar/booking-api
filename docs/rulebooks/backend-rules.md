@@ -60,6 +60,10 @@
 
 - xUnit. Every endpoint has an API test; overlap/availability and lifecycle logic have
   golden-fixture tests with hand-worked expected values (constitution VIII).
+- Database behaviour (constraints, collation, concurrency) is tested against real SQL Server in a
+  throwaway Testcontainers container (`BookingApi.TestSupport`), never an in-memory or SQLite
+  stand-in. The gate therefore needs a running Docker engine; if Docker is down the database
+  tests fail, they never skip.
 - The gate (`docs/sdlc/gate-command.md`) is run by the user; a phase is not done before
   the user confirms exit code 0 — or, under a declared `ci-held` (Lite/Micro/Standard
   only, constitution X), before the owner records approval on the CI evidence triplet.

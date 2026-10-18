@@ -12,6 +12,12 @@ dotnet build BookingApi.slnx --warnaserror && dotnet test BookingApi.slnx --no-b
 "EXIT: $LASTEXITCODE"
 ```
 
+**Docker must be running.** The database tests start a throwaway SQL Server container
+(Testcontainers), so Docker Desktop (or another Docker engine) has to be up when the gate runs.
+The first run pulls the SQL Server image (about 1.5 GB). With Docker stopped the database tests
+fail with the container error; they never skip. They never touch your local `BookingApi`
+LocalDB database.
+
 `docs/sdlc/gate-command.md` has the other shells and explains who certifies the gate.
 
 ## How work is delivered
