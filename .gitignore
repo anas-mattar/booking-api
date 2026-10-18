@@ -1,0 +1,19 @@
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.vs/
+.idea/
+
+# Stray screenshots dropped at repo root — canonical ones live under specs/**/screenshots/
+/*.png
+
+# Local environment files
+.env
+.env*.local
+
+# .NET build output (single repository: code and governance live together)
+bin/
+obj/
+TestResults/
+*.user

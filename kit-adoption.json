@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "projectName": "booking-api",
+  "topology": "single",
+  "tiers": [
+    "backend",
+    "database",
+    "integration"
+  ],
+  "initDate": "2026-10-18",
+  "kitVersionAtInit": "0.8.0",
+  "gateProof": [
+    {
+      "gate": "default",
+      "command": "dotnet build BookingApi.slnx --warnaserror && dotnet test BookingApi.slnx --no-build",
+      "exitCode": 0,
+      "date": "2026-10-18",
+      "recordedBy": "anas.m"
+    }
+  ],
+  "developers": [
+    "anas.m"
+  ]
+}

@@ -1,0 +1,30 @@
+# delivery pack — law digest (GENERATED)
+
+<!-- GENERATED FILE — do not edit. Regenerate: pwsh -File scripts/build-digests.ps1
+     Non-authoritative: for orientation only. The source documents prevail (constitution
+     II is unchanged); read the full document before acting on its area. -->
+
+- Gates 1-5 must hold at every phase commit; gate 6 (human review) applies once per feature, at merge. (`docs/sdlc/definition-of-done.md`)
+- Gate 1: spec.md, plan.md, tasks.md approved before implementation begins; Micro: the approved mini-spec alone. (`docs/sdlc/definition-of-done.md`)
+- Gate 2: only the one approved phase, nothing unrelated; Micro: at most 400 changed lines across the phase's commits. (`docs/sdlc/definition-of-done.md`)
+- Gate 3: the user runs the gate and confirms the exit code — the AI never claims success on its own runs. (`docs/sdlc/definition-of-done.md`)
+- Batched gates (Lite/Standard, plan-declared, max 3 consecutive phases): one certifying user-run gate at batch end. (`docs/sdlc/definition-of-done.md`)
+- ci-held (Lite/Micro/Standard, declared in plan or mini-spec): owner approval recorded on run URL + green + exact sha. (`docs/sdlc/definition-of-done.md`)
+- Gate 4: scope-check PASS — every changed file inside the declared Territory; amendments precede the phase commit. (`docs/sdlc/definition-of-done.md`)
+- Multi-repo: scope-check-repos.ps1 grades the nested code repositories' phase commits under the same rules. (`docs/sdlc/definition-of-done.md`)
+- Gate 5: AI review by a fresh-context agent or second model with the Reviewer Provenance block — never self-graded. (`docs/sdlc/definition-of-done.md`)
+- Gate 5 reads a phase's amendments to its own plan or tasks — they change the standard it is graded by. (`docs/sdlc/definition-of-done.md`)
+- Gate 6: a human reviews the full feature diff and approves before merge — once per feature. (`docs/sdlc/definition-of-done.md`)
+- Gate 6 on Critical: the review is a WARN until the final phase lands, it is committed or the plan says ready. (`docs/sdlc/definition-of-done.md`)
+- If artifacts conflict, stop and report — the constitution prevails; never silently choose. (`docs/sdlc/definition-of-done.md`)
+- Certification is held by the user (the feature's owner); the AI must not claim success without it, in either mode. (`docs/sdlc/gate-command.md`)
+- Agent-run gates are feedback only — they never certify; Critical features do not use them at all. (`docs/sdlc/gate-command.md`)
+- Batching is declared in plan.md before the batch's first phase; per-phase commits, scope checks, and AI reviews stay. (`docs/sdlc/gate-command.md`)
+- Critical features never batch; Micro features never batch — the lane is exactly one phase. (`docs/sdlc/gate-command.md`)
+- The ci-held evidence triplet: CI run URL + green conclusion + exact phase-commit sha (batch: the batch-end commit). (`docs/sdlc/gate-command.md`)
+- ci-held approval is recorded per phase (or per declared batch), never blanket; Critical never uses ci-held. (`docs/sdlc/gate-command.md`)
+- Cite the push-event CI run — a pull_request run executes a merge preview, not the phase commit, and certifies nothing. (`docs/sdlc/gate-command.md`)
+- A phase is Done only against the full gate — a minimum gate is for quick sanity checks only. (`docs/sdlc/gate-command.md`)
+- Never blanket-disable a strict-build flag: upgrade, pin the patched transitive, or record a scoped suppression. (`docs/sdlc/gate-command.md`)
+- The flow: baseline, claim, specify, phase loop (gate, commit, scope check, AI review), human review, merge. (`docs/sdlc/flow.md`)
+- flow.md is a summary, not law — the owning documents prevail, and the constitution prevails over everything. (`docs/sdlc/flow.md`)

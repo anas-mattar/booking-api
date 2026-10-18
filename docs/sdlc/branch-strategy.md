@@ -1,0 +1,181 @@
+# Branch Strategy
+
+Authoritative branch naming and spec-path convention. This kit adopts the **stock Spec Kit
+convention** so the bundled scripts (`.specify/scripts/powershell/`) and `/speckit.*` commands
+work unmodified: numbered feature branches map 1:1 to numbered spec directories.
+
+## Decision
+
+Feature branches are named **`NNN-short-name`** (three-digit sequential number + kebab-case
+slug, e.g. `001-solution-scaffold`, `014-trial-balance`). The feature directory is
+`specs/NNN-short-name/` — the same string as the branch name. Branches and spec directories
+are created together by `/speckit.specify` (via `create-new-feature.ps1`), which allocates the
+next number automatically.
+
+> Do NOT hand-invent a different layout (e.g. nesting specs under an extra folder, or
+> unnumbered descriptive branches). The Spec Kit scripts resolve the feature directory as
+> `specs/<branch>` and reject branches that don't start with `NNN-`; a divergent convention
+> silently disables the whole tooling layer.
+
+<!-- digest: Feature branches are NNN-short-name mapping 1:1 to specs/NNN-short-name/ — never hand-invent a different layout. -->
+
+## Number Allocation
+
+`create-new-feature.ps1` allocates the next number from the **local** `specs/` directory —
+fine for one developer, a collision for a team. With more than one developer, the remote is
+the ledger. **The standard way to run this ritual is one command**:
+
+```powershell
+pwsh -File scripts/claim-feature.ps1 -ShortName <name> "<feature description>"
+```
+
+It fetches, allocates the next number free across local and remote branches and `specs/`
+directories, delegates branch + spec creation to `create-new-feature.ps1`, pushes the
+claim immediately, and renumbers automatically if another claim reached the remote first.
+The manual recipe it automates (kept as the fallback):
+
+1. `git fetch origin` before allocating.
+2. Take the next number unused by any local **or remote** branch or spec directory
+   (`git branch -r` / `git ls-remote --heads origin`).
+3. **Push the branch immediately** (`git push -u origin NNN-<name>`) — the number belongs
+   to whichever branch reaches the remote first. If you lose the race, renumber before any
+   other work.
+
+**Then flip the roadmap row.** The branch is the claim; the roadmap row is what the *next*
+agent reads. In the same sitting, a **main-side** `docs/` commit sets that feature's
+`docs/roadmap.md` row to Status `in progress` with its Owner and Spec path. A claimed
+branch whose row still reads `idea` says the work is unstarted and invites a duplicate
+spec, so `scripts/ritual-checks.ps1` fails while any claim visible on the remote has no
+non-idea row (`scripts/roadmap-claim-check.ps1`).
+
+**Write that Spec cell bracketed** — `` `[specs/NNN-<name>/]` `` — until the feature
+merges. The spec directory lives on the feature branch, so on main it does not exist yet
+and a plain backticked path fails doc-lint on the very commit the rule above requires
+(the two rules collide by construction at claim time; brackets are the kit's authoring
+convention for a path that does not resolve here — `scripts/doc-lint.ps1` header, and the
+`specified` row in `specs/_templates/roadmap-template.md`). Drop the brackets when the
+feature merges and the directory reaches main.
+
+<!-- digest: Flip a new claim's roadmap row to in progress in a main-side docs commit — ritual-checks fails while a claim reads idea. -->
+
+The rest of the multi-developer rules live in `docs/sdlc/team-workflow.md`.
+
+<!-- digest: Claim with scripts/claim-feature.ps1: remote-aware number allocation and an immediate push — the remote is the ledger. -->
+
+## Branch Taxonomy
+
+| Pattern | Use for | Spec dir? | Example |
+|---------|---------|-----------|---------|
+| `NNN-<name>` | New functionality / a deliverable feature (full spec workflow — or a single-page mini-spec alone when declared Micro) | `specs/NNN-<name>/` | `007-user-invitations` |
+| `fix/<name>` | Bug fix or correction (incl. post-merge reverts) | no (lightweight lane) | `fix/aging-rounding` |
+| `chore/<name>` | Tooling, config, maintenance (no behavior change) | no (lightweight lane) | `chore/upgrade-orm` |
+| `docs/<name>` | Documentation / governance only | no (lightweight lane) | `docs/onboarding-guide` |
+
+`<name>` is lowercase, kebab-case, descriptive, and stable for the life of the branch.
+
+**Lightweight lane** (`fix/`, `chore/`, `docs/`): skips spec.md/plan.md/tasks.md, but still
+requires the user-run gate, the `git diff --stat` scope check, and human review before merge.
+If a "fix" grows into behavior change or schema change, stop and promote it to a numbered
+feature. A Lite branch has no spec directory of its own, but if it changes an **approved**
+`spec.md`, `plan.md`, `tasks.md` or `contracts/` file of any feature, that change is an
+amendment and owes the record and the approver in the commit message (constitution I,
+Amendment authority); a branch that changes no such file is not asked for anything.
+
+<!-- digest: Lite lane (fix/, chore/, docs/): no spec directory, but the gate, scope check, and human review before merge remain. -->
+<!-- digest: A Lite branch amending an approved spec document owes the amendment record and the approver in the message. -->
+
+**Delivery levels**: the kit has four, in ascending ceremony — **Lite < Micro < Standard <
+Critical**. **Lite** is the lightweight lane above (`fix/`, `chore/`, `docs/` — no spec
+directory). **Micro** is a numbered feature whose entire specification is a single-page
+mini-spec (`spec.md` from `.specify/templates/micro-spec-template.md`, declaring
+`**Delivery Level**: Micro`) delivered in exactly one phase inside hard bounds — at most
+5 territory files and 400 changed lines, machine-enforced (constitution X, Micro lane).
+**Standard** is the full numbered-feature workflow; it is the default for any numbered
+feature without a declared level. High-risk work uses **Critical**: a numbered feature
+plus the addendum in `docs/sdlc/critical-delivery.md` — Critical MUST NOT use the Micro
+lane. The level is chosen per feature, not per project, declared in the feature's
+`spec.md` at creation.
+
+<!-- digest: Four delivery levels in ascending ceremony: Lite < Micro < Standard < Critical; chosen per feature, declared in spec.md. -->
+<!-- digest: Micro: single-page mini-spec, exactly one phase, at most 5 territory files and 400 changed lines, machine-enforced. -->
+
+Boundaries between neighbors: **Lite vs Micro** — Lite is for work with no behavior
+change (tooling, docs, straightforward bug corrections); the moment a small change alters
+behavior, it is at least Micro — behavior change always gets written, approved intent. **Micro vs
+Standard** — Micro requires fitting every bound (one phase, ≤5 files, ≤400 lines, and the
+mini-spec's eligibility checklist: no schema/packages/architecture/domain-invariant/
+visual-reference surface); anything larger, or any feature needing phases or planning, is
+Standard. A Micro feature that outgrows its bounds mid-flight is **promoted in place to
+Standard** (full spec + plan.md + tasks.md, committed before any further phase commit) —
+exactly like promoting a `fix/` branch that grew into a feature. **Standard vs Critical** —
+Critical when any of the four triggers in `docs/sdlc/critical-delivery.md` applies. The spec's
+**Level Rationale** answers them in writing, and a project that declares critical surfaces in
+`kit-adoption.json` gets a machine floor: a Standard or Micro feature whose Territory reaches
+one is promoted, narrowed, or carries an approved Surface Exception (constitution X, Level
+declaration).
+
+<!-- digest: Behavior change is at least Micro; a Micro feature that outgrows a bound promotes in place to Standard, never stretches. -->
+
+## Rules
+
+- `main` is **protected**. No direct commits to `main`.
+- **One branch per feature.** Do not bundle unrelated work onto a single branch.
+- Merge to `main` only **after the gate is certified (user-confirmed exit code — or,
+  under a plan-declared `ci-held`, the owner's recorded approval on the CI evidence
+  triplet) and human review is approved** (see `docs/sdlc/review-process.md`,
+  `docs/sdlc/gate-command.md`, constitution IX–X).
+- **Push the feature branch to `origin` before merging.** Once a feature is complete
+  (gate green + human review approved), push the feature branch to its remote
+  (`git push -u origin <branch>`) so the branch and its per-phase history are
+  preserved on the server. Then merge to `main` with `--no-ff` (keeping the feature
+  merge commit), and push `main`. For cross-repository features, do this in **each**
+  repository (see `docs/sdlc/repository-strategy.md`).
+- Never force-push `main`.
+- Each implementation phase is its own commit on the feature branch so a bad phase
+  reverts cleanly (see `docs/sdlc/rollback-process.md`).
+
+<!-- digest: main is protected: no direct commits, never force-push; merge only after certification and approved human review. -->
+<!-- digest: Push the feature branch before merging; merge --no-ff so the merge commit survives; one commit per phase. -->
+
+## Spec Directory Contents
+
+```text
+specs/NNN-<name>/
+├─ spec.md
+├─ plan.md
+├─ tasks.md
+├─ research.md            (optional)
+├─ data-model.md          (optional)
+├─ contracts/             (optional)
+├─ quickstart.md          (optional)
+├─ notes.md               (optional — phase evidence; see below)
+├─ screenshots/           (optional — visual references, when the project has them)
+├─ checklists/            (optional)
+├─ ai-code-review.md      (per-feature; from specs/_templates/)
+├─ human-pr-review.md     (per-feature; from specs/_templates/)
+└─ rollback.md            (per-feature; from specs/_templates/)
+```
+
+A **Micro** feature's directory holds `spec.md` (the mini-spec) plus the per-feature
+review files only — no `plan.md`/`tasks.md` until promoted to Standard (constitution X,
+Micro lane).
+
+**`notes.md` is where a feature's evidence lives**: phase results, scenario and measurement
+tables, gate records, review findings and their dispositions, and any judgement the feature
+had to write down. **`tasks.md` holds the agreed work and its completion state, and nothing
+else** — a task says what was agreed, and a ticked box says it is done.
+
+The split is not housekeeping. `spec.md`, `plan.md`, `tasks.md` and `contracts/` are the
+documents the amendment rule grades (constitution I, Amendment authority), so annotating a
+task with what actually happened is an **amendment** to an approved document and owes an
+approver record — while the same sentence in `notes.md` owes nothing. Recording what you
+found must never cost an approval, so record it in `notes.md`.
+
+<!-- digest: notes.md holds a feature's evidence; tasks.md holds the agreed work and its completion state alone. -->
+
+## Cross-Repository Features
+
+When a feature spans backend and frontend, create matching branches in each
+repository using the same `NNN-<name>`, and follow the cross-repository feature rule in
+`docs/sdlc/repository-strategy.md` (backend contract defined before frontend
+implementation; backend merged after gate + review).

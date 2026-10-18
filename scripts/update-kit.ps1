@@ -1,0 +1,356 @@
+<#
+.SYNOPSIS
+    One-command kit update for an adopted project: copies changed verbatim files,
+    reports surgical-class upstream changes, never clobbers local edits.
+
+.DESCRIPTION
+    Runs FROM the kit clone against -Target (an adopted project root). Resolves every
+    kit-shipped file's update class via kit-manifest.json (most-specific match wins —
+    same resolution scripts/doc-lint.ps1 uses to gate the kit's own CI), applies the
+    three-way merge-avoidance rule to verbatim files (data-model.md), and reports
+    surgical files' upstream commits between the target's recorded kit commit and the
+    kit's HEAD — never writing to surgical-class paths.
+
+    Preflight refuses (exit 1) when: -Kit is not a git repo with kit-manifest.json;
+    -Target resolves to -Kit; -Target is missing kit-integrity essentials (partial
+    install); -Target's git working tree is dirty. -DryRun prints the full report with
+    zero writes. -Force <path[]> takes the kit version of specific conflicted verbatim
+    paths; forcing a surgical-class path is refused.
+
+    Every non-DryRun run records the kit HEAD it ran against in .kit-version (contract,
+    step 5) — so a surgical report is delivered exactly once, at the update that carries
+    it: handle it in that session (adoption/updating.md §2-3). The commits a past report
+    named stay recoverable as `git log <oldRecorded>..<newRecorded>` in the kit clone.
+    Conflicts are re-detected from file content every run and keep being reported until
+    resolved, regardless of the recorded commit.
+
+    All content comparisons are CRLF-normalized (research D4) — Windows line-ending
+    differences never count as a change. A file that fails to read as text falls back
+    to a raw-byte comparison.
+
+    Exit codes: 0 clean · 2 attention needed (conflicts, pending surgical work, and/or a
+    red adoption-doctor verdict on the target) · 1 execution error / preflight refusal.
+    A non-DryRun, non-Json apply run ends with the target's scripts/verify-kit.ps1
+    verdict (007 FR-006); -Json callers run the doctor themselves.
+
+    Contract: specs/004-kit-update-channel/contracts/update-kit-cli.md
+
+.EXAMPLE
+    pwsh -File scripts/update-kit.ps1 -Target ../my-project
+    pwsh -File scripts/update-kit.ps1 -Target ../my-project -DryRun
+    pwsh -File scripts/update-kit.ps1 -Target ../my-project -Force docs/sdlc/flow.md
+#>
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory)] [string]$Target,
+    [string]$Kit = (Split-Path -Parent $PSScriptRoot),
+    [switch]$DryRun,
+    [string[]]$Force = @(),
+    [switch]$Json
+)
+
+$ErrorActionPreference = 'Stop'
+
+function Write-Fail {
+    param([string]$Message)
+    if ($Json) { [PSCustomObject]@{ error = $Message } | ConvertTo-Json -Compress }
+    else { Write-Host "ERROR: $Message" }
+    exit 1
+}
+
+# --- Preflight: kit root ------------------------------------------------------------
+if (-not (Test-Path $Kit)) { Write-Fail "Kit root not found: $Kit" }
+$Kit = (Resolve-Path $Kit).Path
+if (-not (Test-Path (Join-Path $Kit '.git'))) { Write-Fail "-Kit ($Kit) is not a git repository." }
+$manifestPath = Join-Path $Kit 'kit-manifest.json'
+if (-not (Test-Path $manifestPath)) { Write-Fail "kit-manifest.json not found at kit root ($Kit)." }
+
+# --- Preflight: target ----------------------------------------------------------------
+if (-not (Test-Path $Target)) { Write-Fail "Target not found: $Target" }
+$Target = (Resolve-Path $Target).Path
+if ($Target -ieq $Kit) { Write-Fail '-Target resolves to the kit itself — refusing to self-update.' }
+
+# Kit-integrity essentials — must match scripts/doc-lint.ps1's $requiredKitPaths.
+$requiredKitPaths = @(
+    'CLAUDE.md'
+    'AGENTS.md'
+    '.specify/memory/constitution.md'
+    '.specify/templates'
+    '.specify/scripts'
+    '.claude/commands'
+    'docs/sdlc/definition-of-done.md'
+    'docs/sdlc/flow.md'
+    'docs/sdlc/gate-command.md'
+    'docs/sdlc/review-process.md'
+    'docs/rulebooks'
+    'specs/_templates'
+    'scripts/claim-feature.ps1'
+    'scripts/territory-check.ps1'
+)
+$missingTarget = $requiredKitPaths | Where-Object { -not (Test-Path (Join-Path $Target $_)) }
+if ($missingTarget.Count -gt 0) {
+    Write-Fail "Target is missing kit-integrity essentials (partial install?): $($missingTarget -join ', ')"
+}
+
+$targetStatus = git -C $Target status --porcelain 2>$null
+if ($LASTEXITCODE -ne 0) { Write-Fail "Target ($Target) is not a git repository." }
+if ($targetStatus) { Write-Fail 'Target working tree is dirty — updates must land reviewable. Commit or stash first.' }
+
+# --- Manifest resolution (must match scripts/doc-lint.ps1's glob/specificity rules) ----
+function ConvertTo-GlobRegex {
+    param([string]$Pattern)
+    $e = [regex]::Escape($Pattern)
+    $e = $e -replace '\\\*\\\*', '@@DBLSTAR@@'
+    $e = $e -replace '\\\*', '[^/]*'
+    $e = $e -replace '@@DBLSTAR@@', '.*'
+    return "^$e`$"
+}
+
+function Get-PatternSpecificity {
+    param([string]$Pattern)
+    $starIdx = $Pattern.IndexOf('*')
+    if ($starIdx -lt 0) { return 1000000 + $Pattern.Length }
+    return $starIdx
+}
+
+$manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json
+$manifestEntries = @($manifest.entries)
+
+function Resolve-Class {
+    param([string]$RelPath)
+    $hits = @($manifestEntries | Where-Object { $RelPath -match (ConvertTo-GlobRegex $_.path) })
+    if ($hits.Count -eq 0) { return $null }
+    $maxSpec = ($hits | ForEach-Object { Get-PatternSpecificity $_.path } | Measure-Object -Maximum).Maximum
+    $winners = @($hits | Where-Object { (Get-PatternSpecificity $_.path) -eq $maxSpec })
+    $classes = @($winners.class | Select-Object -Unique)
+    if ($classes.Count -gt 1) { return $null }
+    return $classes[0]
+}
+
+# Shipped surfaces — must match scripts/doc-lint.ps1's enumeration (research D7).
+$shipped = @()
+foreach ($f in 'CLAUDE.md', 'AGENTS.md', 'README.md', '.specify/memory/constitution.md', 'kit-manifest.json') {
+    if (Test-Path (Join-Path $Kit $f)) { $shipped += $f }
+}
+foreach ($dir in '.specify/templates', '.specify/scripts', '.claude/commands', 'docs', 'adoption', 'modules', 'specs/_templates', '.github') {
+    $p = Join-Path $Kit $dir
+    if (Test-Path $p) {
+        $shipped += Get-ChildItem $p -Recurse -File | ForEach-Object {
+            ([IO.Path]::GetRelativePath($Kit, $_.FullName)) -replace '\\', '/'
+        }
+    }
+}
+$scriptsDir = Join-Path $Kit 'scripts'
+if (Test-Path $scriptsDir) {
+    $shipped += Get-ChildItem $scriptsDir -Filter *.ps1 -File | ForEach-Object {
+        ([IO.Path]::GetRelativePath($Kit, $_.FullName)) -replace '\\', '/'
+    }
+}
+$shipped = $shipped | Where-Object { $_ -ne 'docs/roadmap.md' } | Select-Object -Unique
+
+$classified = @(foreach ($f in $shipped) {
+    $c = Resolve-Class $f
+    if ($c) { [PSCustomObject]@{ Path = $f; Class = $c } }
+})
+# The four classes, named here rather than assumed. 'generated' and 'kit-only' are both
+# skipped by this script, but for different reasons: a generated file is rebuilt by the
+# adopting project from its OWN law, while a kit-only file has no meaning outside this
+# repository at all (feature 015, plan D3 — the harness's workflow would otherwise match the
+# '.github/**' verbatim glob and land in every adopted project). An unrecognised class is a
+# manifest typo, and a typo that silently skipped a file is how a verbatim update stops
+# arriving without anyone noticing — so it fails here instead.
+$knownClasses = @('verbatim', 'surgical', 'generated', 'kit-only')
+$unknown = @($classified | Where-Object { $_.Class -notin $knownClasses })
+if ($unknown.Count -gt 0) {
+    Write-Fail ("kit-manifest.json declares $($unknown.Count) file(s) with an unrecognised class: " +
+        (($unknown | ForEach-Object { "$($_.Path) ('$($_.Class)')" }) -join ', ') +
+        ". Legal classes: $($knownClasses -join ', ').")
+}
+
+$verbatimFiles = @($classified | Where-Object { $_.Class -eq 'verbatim' })
+$surgicalFiles = @($classified | Where-Object { $_.Class -eq 'surgical' })
+
+# --- -Force validation: only verbatim paths may be forced ------------------------------
+$forceSet = @($Force | ForEach-Object { $_ -replace '\\', '/' })
+foreach ($f in $forceSet) {
+    $entry = $classified | Where-Object { $_.Path -eq $f }
+    if (-not $entry) { Write-Fail "-Force path '$f' is not a manifest-classified kit file." }
+    if ($entry.Class -ne 'verbatim') { Write-Fail "-Force path '$f' is class '$($entry.Class)' — only verbatim paths may be forced." }
+}
+
+# --- Version record ---------------------------------------------------------------------
+$kitVersionPath = Join-Path $Target '.kit-version'
+$recordedCommit = $null
+if (Test-Path $kitVersionPath) {
+    try { $recordedCommit = (Get-Content $kitVersionPath -Raw | ConvertFrom-Json).kitCommit } catch {}
+}
+# Is the recorded commit a commit of THIS kit clone? A shallow or rewritten clone, or another fork, does not have it. The surgical pass
+# below reads its log, and a log that failed is not a log with no upstream commits: it must not be reported as 'nothing changed'
+# (feature 033, GAP-039).
+$recordedKnown = $true
+if ($recordedCommit) {
+    git -C $Kit cat-file -e "${recordedCommit}^{commit}" 2>$null
+    $recordedKnown = ($LASTEXITCODE -eq 0)
+}
+# The short form the delivered-once NOTE prints. A hand-edited .kit-version can hold a value shorter than seven characters or one that is not a
+# string, and an unknown one now reaches that NOTE (feature 033, review finding F1).
+$recordedShort = if ($recordedCommit) { "$recordedCommit".Substring(0, [Math]::Min(7, "$recordedCommit".Length)) } else { '<old>' }
+$kitHeadSha = (git -C $Kit rev-parse HEAD).Trim()
+$constitutionText = Get-Content (Join-Path $Kit '.specify/memory/constitution.md') -Raw
+$kitVersionString = if ($constitutionText -match '\*\*Version\*\*:\s*([0-9]+\.[0-9]+\.[0-9]+)') { $Matches[1] } else { 'unknown' }
+
+function Get-NormalizedText {
+    param([string]$Path)
+    if (-not (Test-Path $Path)) { return $null }
+    try {
+        return (Get-Content -LiteralPath $Path -Raw -ErrorAction Stop) -replace "`r`n", "`n"
+    } catch {
+        return [System.Convert]::ToBase64String([IO.File]::ReadAllBytes($Path))
+    }
+}
+
+# --- Verbatim pass (data-model.md three-way table) --------------------------------------
+$applied = @()
+$conflicts = @()
+foreach ($entry in $verbatimFiles) {
+    $rel = $entry.Path
+    $kitAbs = Join-Path $Kit $rel
+    $targetAbs = Join-Path $Target $rel
+    $kitText = Get-NormalizedText $kitAbs
+
+    if (-not (Test-Path $targetAbs)) {
+        if (-not $DryRun) {
+            $destDir = Split-Path -Parent $targetAbs
+            if ($destDir -and -not (Test-Path $destDir)) { New-Item -ItemType Directory -Path $destDir -Force | Out-Null }
+            Copy-Item $kitAbs $targetAbs -Force
+        }
+        $applied += [PSCustomObject]@{ Path = $rel; State = 'never installed -> copied' }
+        continue
+    }
+
+    $targetText = Get-NormalizedText $targetAbs
+    if ($targetText -eq $kitText) { continue }   # up to date
+
+    $baselineText = $null
+    if ($recordedCommit) {
+        # Redirect straight to a file rather than capturing via the pipeline: PowerShell's
+        # line-array capture of native stdout drops exact newline fidelity (notably a
+        # trailing newline), which would make an untouched file compare unequal to its
+        # own baseline. Reusing Get-NormalizedText keeps this comparison symmetric with
+        # the kit/target reads above.
+        $tmpFile = [IO.Path]::GetTempFileName()
+        try {
+            & git -C $Kit show "${recordedCommit}:$rel" > $tmpFile 2>$null
+            if ($LASTEXITCODE -eq 0) { $baselineText = Get-NormalizedText $tmpFile }
+        } finally {
+            Remove-Item $tmpFile -ErrorAction SilentlyContinue
+        }
+    }
+
+    $forced = $forceSet -contains $rel
+    if ($forced -or ($null -ne $baselineText -and $baselineText -eq $targetText)) {
+        if (-not $DryRun) { Copy-Item $kitAbs $targetAbs -Force }
+        $applied += [PSCustomObject]@{ Path = $rel; State = if ($forced) { 'forced -> kit version' } else { 'clean update -> copied' } }
+    } elseif ($recordedCommit -and $null -ne $baselineText) {
+        $conflicts += [PSCustomObject]@{ Path = $rel; Reason = 'locally modified'; Resolution = "rerun with -Force $rel to take the kit version" }
+    } else {
+        $conflicts += [PSCustomObject]@{ Path = $rel; Reason = 'differs — no baseline (unknown provenance)'; Resolution = "review manually, or rerun with -Force $rel to take the kit version" }
+    }
+}
+
+# --- Surgical pass (research D6) --------------------------------------------------------
+$surgicalReport = @()
+foreach ($entry in $surgicalFiles) {
+    $rel = $entry.Path
+    if (-not $recordedCommit -or -not $recordedKnown) {
+        $surgicalReport += [PSCustomObject]@{ Path = $rel; Commits = @(); Note = 'no baseline — review all' }
+        continue
+    }
+    $log = @(git -C $Kit log "$recordedCommit..HEAD" --oneline -- $rel 2>$null)
+    if ($log.Count -gt 0) {
+        $surgicalReport += [PSCustomObject]@{ Path = $rel; Commits = $log; Note = 'upstream commits since your recorded kit version — see adoption/updating.md' }
+    }
+}
+
+# --- Compute the recorded commit for this run's write + report ---------------------------
+# Always the kit HEAD this run was computed against (contract step 5; SC-005 idempotence).
+# An earlier implementation held the record at the OLD sha while surgical items were
+# outstanding, mis-citing SC-002 (which is about never overwriting project content) — but
+# the surgical backlog is computed FROM this record, so the hold deadlocked: the record
+# could never advance once any surgical change shipped, "up to date" never returned, and
+# the report re-listed a growing backlog forever (fix/update-kit-version-ratchet).
+# Surgical reports are therefore delivered once, at the update that carries them; past
+# reports stay recoverable as `git log <oldRecorded>..<newRecorded>` in the kit clone.
+# Conflicts are content-detected each run and keep being reported regardless.
+$newKitCommit = $kitHeadSha
+
+if (-not $DryRun) {
+    $record = [PSCustomObject]@{
+        kitVersion = $kitVersionString
+        kitCommit  = $newKitCommit
+        updatedOn  = (Get-Date -Format 'yyyy-MM-dd')
+    }
+    Set-Content -LiteralPath $kitVersionPath -Value ($record | ConvertTo-Json)
+}
+
+# --- Report -------------------------------------------------------------------------------
+$upToDate = ($applied.Count -eq 0 -and $conflicts.Count -eq 0 -and $surgicalReport.Count -eq 0)
+
+if ($Json) {
+    [PSCustomObject]@{
+        applied   = $applied
+        surgical  = $surgicalReport
+        conflicts = $conflicts
+        dryRun    = [bool]$DryRun
+        result    = if ($upToDate) { 'up to date' } else { [PSCustomObject]@{ kitVersion = $kitVersionString; kitCommit = $newKitCommit } }
+    } | ConvertTo-Json -Depth 6
+} else {
+    Write-Host "update-kit: $Kit -> $Target$(if ($DryRun) { ' (dry run — zero writes)' })"
+    if ($recordedCommit -and -not $recordedKnown) {
+        Write-Host "NOTE: the recorded kit commit $recordedCommit is not in the kit clone (a shallow or rewritten clone, or another fork), so every surgical file is listed as having no baseline - the verbatim files below could not be compared to a baseline either."
+    }
+    if ($applied.Count -gt 0) {
+        Write-Host "Applied ($($applied.Count)):"
+        foreach ($a in $applied) { Write-Host "  $($a.Path)  [$($a.State)]" }
+    }
+    if ($surgicalReport.Count -gt 0) {
+        Write-Host "Surgical - upstream changes, never applied ($($surgicalReport.Count)):"
+        foreach ($s in $surgicalReport) {
+            Write-Host "  $($s.Path)"
+            foreach ($c in $s.Commits) { Write-Host "    $c" }
+            Write-Host "    $($s.Note)"
+        }
+    }
+    if ($conflicts.Count -gt 0) {
+        Write-Host "Conflicts - locally modified, not applied ($($conflicts.Count)):"
+        foreach ($c in $conflicts) { Write-Host "  $($c.Path)  [$($c.Reason)] -- $($c.Resolution)" }
+    }
+    if ($upToDate) {
+        Write-Host 'Result: up to date'
+    } else {
+        Write-Host "Result: kit $kitVersionString @ $newKitCommit$(if ($DryRun) { ' (not written - dry run)' })"
+    }
+    if ($surgicalReport.Count -gt 0 -and -not $DryRun) {
+        Write-Host "NOTE: this surgical report is delivered once — the record now advances to kit HEAD. Handle it this session (adoption/updating.md); recover it later with: git log $recordedShort..$($kitHeadSha.Substring(0,7)) in the kit clone."
+    }
+}
+
+# --- Adoption doctor verdict (007 FR-006) --------------------------------------------------
+# An apply run ends with the target's integrity verdict so flow-down damage surfaces in
+# the same terminal session that caused it. Child process: verify-kit terminates with
+# `exit`. Red doctor = "attention needed" (exit 2 — the documented meaning, unchanged).
+# Skipped in -DryRun (nothing changed to audit) and -Json (machine callers run
+# `verify-kit.ps1 -Json -Root <target>` themselves — adoption/updating.md).
+$doctorRed = $false
+if (-not $DryRun -and -not $Json) {
+    $doctorScript = Join-Path $Kit 'scripts/verify-kit.ps1'
+    if (Test-Path $doctorScript) {
+        Write-Host ''
+        Write-Host '--- adoption doctor (scripts/verify-kit.ps1) ---'
+        & pwsh -NoProfile -File $doctorScript -Root $Target
+        $doctorRed = ($LASTEXITCODE -ne 0)
+    }
+}
+
+if ($conflicts.Count -gt 0 -or $surgicalReport.Count -gt 0 -or $doctorRed) { exit 2 }
+exit 0
