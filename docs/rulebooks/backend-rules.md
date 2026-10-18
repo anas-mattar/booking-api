@@ -7,10 +7,20 @@
 
 ## Layering & Placement
 
-- Code layout: decided ADR-style in feature 001's approved `plan.md` (constitution IV,
-  bootstrap clause) and recorded here once 001 merges. Until then the layout is the empty
-  scaffold: API in **src/BookingApi/**, tests in **tests/BookingApi.Tests/**, both in
-  **BookingApi.slnx**.
+- Code layout: Clean Architecture in four projects, decided in ADR-001
+  (`specs/001-solution-scaffold/plan.md`, constitution IV): **src/BookingApi.Domain/**
+  (entities, invariant logic; references nothing), **src/BookingApi.Application/** (use cases
+  and ports; references Domain only), **src/BookingApi.Infrastructure/** (EF Core and other
+  adapters; references Application), **src/BookingApi.Api/** (HTTP host, endpoints, DTOs;
+  references Application, and Infrastructure only to register services in `Program.cs`).
+  Tests: **tests/BookingApi.Domain.Tests/**, **tests/BookingApi.Application.Tests/**,
+  **tests/BookingApi.Api.Tests/**, all in **BookingApi.slnx**.
+- Dependencies MUST point inward: `Api → Application → Domain` and `Infrastructure →
+  Application`. Domain and Application MUST NOT reference ASP.NET Core or EF Core packages.
+  **Why**: the invariants in `docs/domain/booking-invariants.md` must stay testable without
+  HTTP or a database; the dependency-rule tests in the Domain and Application test projects
+  fail the gate on a violation.
+- An endpoint MUST call an Application use case and MUST NOT use the DbContext directly.
 - New code MUST follow the existing layout. A new top-level folder, layer, or project
   requires approval in the feature's `plan.md`.
   **Why**: architecture changes ride in on "just one helper folder" — this is where drift starts.

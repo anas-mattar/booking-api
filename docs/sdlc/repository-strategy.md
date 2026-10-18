@@ -15,8 +15,10 @@ that repository receives code.
 
 Contains:
 
-- ASP.NET Core Web API (.NET 10) — **src/BookingApi/**
-- Backend tests — **tests/BookingApi.Tests/**
+- ASP.NET Core Web API (.NET 10), layered per ADR-001 — **src/BookingApi.Api/**,
+  **src/BookingApi.Application/**, **src/BookingApi.Domain/**, **src/BookingApi.Infrastructure/**
+- Backend tests — **tests/BookingApi.Api.Tests/**, **tests/BookingApi.Application.Tests/**,
+  **tests/BookingApi.Domain.Tests/**
 - Database migrations (EF Core, SQL Server), once the first persistence feature adds them
 - Governance and the feature trail — `.specify/`, `docs/`, `specs/`, `scripts/`
 

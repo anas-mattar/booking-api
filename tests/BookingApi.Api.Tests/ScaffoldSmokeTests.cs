@@ -1,4 +1,4 @@
-namespace BookingApi.Tests;
+namespace BookingApi.Api.Tests;
 
 public class ScaffoldSmokeTests
 {
@@ -7,6 +7,6 @@ public class ScaffoldSmokeTests
     {
         var assembly = typeof(Program).Assembly;
 
-        Assert.Equal("BookingApi", assembly.GetName().Name);
+        Assert.Equal("BookingApi.Api", assembly.GetName().Name);
     }
 }
