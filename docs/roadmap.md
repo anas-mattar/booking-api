@@ -30,7 +30,7 @@ Status flow: `idea → specified → in progress → shipped → dropped`
 | Feature | Covers (Inv #) | Priority | Status | Owner | Spec |
 |---|---|---|---|---|---|
 | Solution scaffold (architecture ADR in plan.md) | — | P1 | shipped | anas.m | `specs/001-solution-scaffold/` |
-| Resource catalog (create, get, list; first migration) | — | P1 | in progress | anas.m | `[specs/002-resource-catalog/]` |
+| Resource catalog (create, get, list; first migration) | — | P1 | shipped | anas.m | `specs/002-resource-catalog/` |
 
 ## Decisions log *(authored)*
 
@@ -43,3 +43,8 @@ Status flow: `idea → specified → in progress → shipped → dropped`
   first migration. Sequence chosen by the owner: resources, then time slots, then bookings
   (reads before writes; the booking invariants are exercised only by the last). Critical
   surfaces are not declared yet; revisit when booking logic arrives.
+- 2026-10-19 Feature 002-resource-catalog shipped (PR #7): `Resource` entity, create/get/list use
+  cases, EF mapping and the first migration `ResourceCatalog`, three public endpoints. The gate
+  now needs Docker (Testcontainers SQL Server). The endpoints are unauthenticated by design: an
+  authentication feature must land before any deployment. Next features are sequenced by the
+  owner (time slots, then bookings); none is claimed.
