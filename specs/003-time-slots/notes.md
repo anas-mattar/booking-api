@@ -57,3 +57,12 @@ booking exists; 5 prepared). Thirteen mutations applied, twelve caught.
 - **F4 (accepted)**: tick precision matches `datetime2(7)`.
 - **F5 (accepted)**: the test-first claim rests on the agent's report of the skeleton run (41 of 66
   failed); it cannot be re-verified from git history because the skeleton was never committed.
+
+### Phase 1 gate certification
+
+Gate 3 certified (user-run, Critical: human-executed): `dotnet build BookingApi.slnx --warnaserror &&
+dotnet test BookingApi.slnx --no-build` run by anas.m from the repository root, `EXIT: 0` (190 of 190
+tests passed), on commit `f2a7a77` (phase 1 is `36ad545`, remediation `f2a7a77`) - anas.m, 2026-10-19.
+The earlier run on `b33164b` (`EXIT: 1`, 2 failures, names not captured) was not reproduced: CI was green
+on that commit and the agent's scoped runs passed, so it is recorded as an unexplained, possibly flaky,
+local failure, not as a defect found. If it recurs, capture the failing test names.
