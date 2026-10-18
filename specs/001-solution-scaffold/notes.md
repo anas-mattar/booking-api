@@ -24,3 +24,14 @@ never costs an approval.
 Gate 3 certified (user-run): `dotnet build BookingApi.slnx --warnaserror && dotnet test
 BookingApi.slnx --no-build` run by anas.m from the repository root, `EXIT: 0` (7 projects
 built, 4 of 4 tests passed), on commit `5ded1b0` (phase 1 is `9c9fa5f`) - anas.m, 2026-10-18.
+
+### Review decisions (phase 1)
+
+- **F1 accepted**: the dependency-rule tests check project and package references from the
+  `.csproj` files, not `GetReferencedAssemblies()`. Accepted as is by anas.m, 2026-10-18; the
+  known blind spots (rules leaked through `Directory.Build.props`, or a switch to the web SDK)
+  are accepted with it. No document is amended.
+- **F2 accepted as a phase 2 addition**: tests for the Infrastructure and Api rules, added to
+  phase 2 as T026 by an owner-approved `tasks.md` amendment (anas.m, 2026-10-18).
+- **F5 (doc drift) left open**: the backend rulebook's MUST bullet omits the "Api references
+  Infrastructure for registration only" exception, which the bullet above it states.
