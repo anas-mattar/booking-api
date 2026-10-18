@@ -122,3 +122,24 @@ passed), on commit `96a6b68` (phase 4 is `6f4a5cb`) - anas.m, 2026-10-18.
 - **SC-002 verified by hand**: anas.m ran `quickstart.md` against the local LocalDB database
   `BookingApi` on 2026-10-18; readiness answered 200 with the database up and 503 with it
   offline (owner's report, recorded here as told).
+
+## Linux CI defect found at the end (phases 1 and 2 tests)
+
+- **What**: the CI `project-gate` failed on the branch tip (run 39138891414, commit 5357bb0).
+  The csproj-based dependency-rule tests (phase 1, T001/T002, and phase 2, T026) took the
+  file name of a `ProjectReference` such as `..\BookingApi.Domain\BookingApi.Domain.csproj`
+  with `Path.GetFileNameWithoutExtension`; that splits on `\` only on Windows, so on the
+  ubuntu runner the "name" was the whole relative path and three tests failed.
+- **Why it was missed**: every local run, every user-run gate (phases 1-4) and all four AI
+  reviews ran on Windows, where the tests pass. The branch's CI runs after each phase push
+  were not inspected; the Linux witness (gate-command.md, "CI gate as second witness") was
+  only read at the end. Phase 1/2 reviews could not see a platform-dependent behaviour.
+- **Fix**: normalize `\` to `/` before taking the file name: commit 4f36269 (phase 1, the
+  Application test) and ca4284a (phase 2, the Api tests). Both inside their phase's
+  Territory, scope-check PASS. CI `ritual-checks` and `project-gate` then green on ca4284a.
+- **Effect on certifications**: the owner's phase 1-4 gate certifications stand for the
+  Windows run they covered; the final tip needs one more user-run gate, and the CI run on
+  ca4284a is the Linux evidence. The fix is two lines and was not given its own fresh-context
+  review; the feature-level human review at merge covers it.
+- **Lesson for the kit** (friction log): a csproj-parsing rule test is platform-sensitive;
+  and the phase ritual should say to read the branch's CI run before asking for the gate.
