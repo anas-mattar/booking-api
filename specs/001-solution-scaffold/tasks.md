@@ -49,27 +49,27 @@ project reference is added.
 
 ### Tests
 
-- [ ] T001 [P] Create `tests/BookingApi.Domain.Tests` (xUnit) with `DependencyRuleTests`:
+- [x] T001 [P] Create `tests/BookingApi.Domain.Tests` (xUnit) with `DependencyRuleTests`:
   the `BookingApi.Domain` assembly references no other BookingApi assembly and no
   `Microsoft.AspNetCore.*` / `Microsoft.EntityFrameworkCore*` assembly
-- [ ] T002 [P] Create `tests/BookingApi.Application.Tests` (xUnit) with `DependencyRuleTests`:
+- [x] T002 [P] Create `tests/BookingApi.Application.Tests` (xUnit) with `DependencyRuleTests`:
   `BookingApi.Application` references `BookingApi.Domain` and no `BookingApi.Infrastructure`,
   `BookingApi.Api`, `Microsoft.AspNetCore.*` or `Microsoft.EntityFrameworkCore*` assembly
 
 ### Implementation
 
-- [ ] T003 `git mv src/BookingApi src/BookingApi.Api`, rename the project file and the
+- [x] T003 `git mv src/BookingApi src/BookingApi.Api`, rename the project file and the
   assembly to `BookingApi.Api`; update `BookingApi.slnx`
-- [ ] T004 [P] Create class libraries `src/BookingApi.Domain`, `src/BookingApi.Application`,
+- [x] T004 [P] Create class libraries `src/BookingApi.Domain`, `src/BookingApi.Application`,
   `src/BookingApi.Infrastructure` (no template `Class1.cs`), add to `BookingApi.slnx` under
   `/src/`
-- [ ] T005 Add project references per ADR-001: Application → Domain; Infrastructure →
+- [x] T005 Add project references per ADR-001: Application → Domain; Infrastructure →
   Application; Api → Application and Infrastructure; each test project → its layer
-- [ ] T006 Remove the weatherforecast endpoint and record from
+- [x] T006 Remove the weatherforecast endpoint and record from
   `src/BookingApi.Api/Program.cs`; remove the sample request from `BookingApi.http` (FR-001)
-- [ ] T007 `git mv tests/BookingApi.Tests tests/BookingApi.Api.Tests`, rename project and
+- [x] T007 `git mv tests/BookingApi.Tests tests/BookingApi.Api.Tests`, rename project and
   namespace, keep the smoke test pointed at `BookingApi.Api`; update `BookingApi.slnx`
-- [ ] T008 Update the paths in `CLAUDE.md` (Stack Profile), `docs/rulebooks/backend-rules.md`
+- [x] T008 Update the paths in `CLAUDE.md` (Stack Profile), `docs/rulebooks/backend-rules.md`
   (Layering & Placement — now records ADR-001's layout and dependency rule) and
   `docs/sdlc/repository-strategy.md` (This repository); regenerate digests if any
   digest-marked line changed
