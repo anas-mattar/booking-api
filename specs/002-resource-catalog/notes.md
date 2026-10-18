@@ -35,3 +35,30 @@ never costs an approval.
 Gate 3 certified (user-run): `dotnet build BookingApi.slnx --warnaserror && dotnet test
 BookingApi.slnx --no-build` run by anas.m from the repository root, `EXIT: 0` (39 of 39 tests
 passed), on commit `8e71df6` (phase 1 is `d5d4abb`, remediation `763fe1c`) - anas.m, 2026-10-18.
+
+## Phase 2
+
+- **Test-first**: written against throwing skeleton handlers: 20 of 22 failed (the 2 that
+  passed are the existing dependency-rule tests). The strict build was run only after the real
+  handlers existed (the skeleton's unread constructor parameters trip `--warnaserror`).
+  After remediation: 27 Application tests, 64 across the solution.
+- **Reviewer mutation checks** (all caught, all restored): removing `NameExistsAsync` failed 2
+  tests; swapping the `DuplicateName` arm failed 1; looking up the untrimmed name failed 1;
+  a maximum page size of 101 failed 1.
+- **Review F1, F2 fixed**: `IResourceRepository` now states, as contract for phase 3: `AddAsync`
+  assigns the database-generated `Id` to the same instance it was given; retired rows are
+  invisible and their names do not block a new resource; names arrive trimmed and
+  case-insensitivity is the store's collation; paging bounds are trusted and the offset must
+  be 64-bit, an empty page past the end; cancellation and unexpected failures propagate.
+- **Review F5, F6 fixed**: the fake assigns ids; the Get test discriminates between two
+  resources; tests cover cancellation-token forwarding for all three handlers and
+  store-failure propagation for create.
+- **Review F3 (left, accepted)**: the `default` arm of the `AddResourceResult` switch is
+  unreachable today. C# needs a discard arm to call an enum switch exhaustive, and throwing is
+  the safe behaviour for a value added later; no test can reach it.
+- **Review F4 (accepted, for phase 4)**: the outcome records are not exhaustive to the
+  compiler. Phase 4 must map every subtype explicitly, make the fall-through arm throw, and
+  cover each outcome over HTTP.
+- **Review F6 remainder (open, minor)**: no test for a null command; `ResourcePage` can
+  express page 0 or a mutable item list. Left as is: the API only builds commands from
+  parsed requests, and the page type is only built by the repository and handlers.
