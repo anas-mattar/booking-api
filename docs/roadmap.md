@@ -31,6 +31,7 @@ Status flow: `idea → specified → in progress → shipped → dropped`
 |---|---|---|---|---|---|
 | Solution scaffold (architecture ADR in plan.md) | — | P1 | shipped | anas.m | `specs/001-solution-scaffold/` |
 | Resource catalog (create, get, list; first migration) | — | P1 | shipped | anas.m | `specs/002-resource-catalog/` |
+| Time slots (open a one-off UTC interval on a resource; create, get, list) | — | P1 | in progress | anas.m | `[specs/003-time-slots/]` |
 
 ## Decisions log *(authored)*
 
@@ -48,3 +49,7 @@ Status flow: `idea → specified → in progress → shipped → dropped`
   now needs Docker (Testcontainers SQL Server). The endpoints are unauthenticated by design: an
   authentication feature must land before any deployment. Next features are sequenced by the
   owner (time slots, then bookings); none is claimed.
+- 2026-10-19 Feature 003-time-slots claimed: a slot is a one-off half-open UTC interval on a
+  resource; create, get and list nested under `/resources/{resourceId}/slots`; slots of one
+  resource may not overlap; no update or retire yet (owner decisions). Bookings follow; critical
+  surfaces are revisited then.
