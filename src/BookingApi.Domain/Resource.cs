@@ -1,18 +1,35 @@
 namespace BookingApi.Domain;
 
-// Rules: specs/002-resource-catalog/spec.md FR-001, FR-008, FR-009; data-model.md.
+// Rules: specs/002-resource-catalog/spec.md FR-001, FR-008, FR-009; data-model.md;
+// contract: specs/002-resource-catalog/contracts/resources-api.md (field names, create rules).
 
 /// <summary>One invalid input field. <see cref="Field"/> uses the API contract's field names.</summary>
 public sealed record ValidationError(string Field, string Message);
 
-/// <summary>The outcome of <see cref="Resource.Create"/>: the resource, or the field errors.</summary>
+/// <summary>
+/// The outcome of <see cref="Resource.Create"/>: exactly one of a resource or at least one
+/// field error. Only the factory can build one, so the impossible states (both, or neither)
+/// cannot be expressed.
+/// </summary>
 public sealed class CreateResourceResult
 {
-    public Resource? Value { get; init; }
+    private CreateResourceResult(Resource? value, IReadOnlyList<ValidationError> errors)
+    {
+        Value = value;
+        Errors = errors;
+    }
 
-    public IReadOnlyList<ValidationError> Errors { get; init; } = [];
+    public Resource? Value { get; }
 
-    public bool IsSuccess => Errors.Count == 0;
+    public IReadOnlyList<ValidationError> Errors { get; }
+
+    public bool IsSuccess => Value is not null;
+
+    internal static CreateResourceResult Success(Resource value) => new(value, []);
+
+    // A copy, wrapped read-only: a caller cannot mutate the list it was handed.
+    internal static CreateResourceResult Failure(IEnumerable<ValidationError> errors)
+        => new(null, Array.AsReadOnly(errors.ToArray()));
 }
 
 /// <summary>A bookable thing. Can only be created valid; never edited or retired by this code.</summary>
@@ -79,21 +96,18 @@ public sealed class Resource
 
         if (errors.Count > 0)
         {
-            return new CreateResourceResult { Errors = errors };
+            return CreateResourceResult.Failure(errors);
         }
 
         var nowUtc = now.UtcDateTime;
-        return new CreateResourceResult
+        return CreateResourceResult.Success(new Resource
         {
-            Value = new Resource
-            {
-                Name = trimmed,
-                Description = description,
-                CreatedAtUtc = nowUtc,
-                CreatedBy = AnonymousUser,
-                UpdatedAtUtc = nowUtc,
-                UpdatedBy = AnonymousUser,
-            },
-        };
+            Name = trimmed,
+            Description = description,
+            CreatedAtUtc = nowUtc,
+            CreatedBy = AnonymousUser,
+            UpdatedAtUtc = nowUtc,
+            UpdatedBy = AnonymousUser,
+        });
     }
 }

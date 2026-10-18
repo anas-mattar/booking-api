@@ -1,6 +1,7 @@
 namespace BookingApi.Domain.Tests;
 
-// Rules: specs/002-resource-catalog/spec.md FR-001, FR-008, FR-009; data-model.md.
+// Rules: specs/002-resource-catalog/spec.md FR-001, FR-008, FR-009; data-model.md;
+// contract: specs/002-resource-catalog/contracts/resources-api.md.
 public class ResourceTests
 {
     private static readonly DateTimeOffset Now = new(2026, 10, 18, 12, 0, 0, TimeSpan.Zero);
@@ -8,6 +9,37 @@ public class ResourceTests
     private static CreateResourceResult Create(string? name, string? description = null)
         => Resource.Create(name, description, Now);
 
+    [Theory]
+    [InlineData(" Room A ")]   // no-break space
+    [InlineData("　Room A　")]   // ideographic space
+    [InlineData("\t\nRoom A\r\n")]       // control whitespace
+    public void CreateTrimsEveryKindOfUnicodeWhitespaceFromTheName(string name)
+    {
+        var result = Create(name);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("Room A", result.Value!.Name);
+    }
+
+    [Fact]
+    public void ASuccessfulResultCarriesAValueAndNoErrors()
+    {
+        var result = Create("Room A");
+
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
+        Assert.Empty(result.Errors);
+    }
+
+    [Fact]
+    public void AFailedResultCannotBeMutatedThroughItsErrorList()
+    {
+        var result = Create("   ");
+
+        var errors = Assert.IsAssignableFrom<IReadOnlyList<ValidationError>>(result.Errors);
+        Assert.Throws<NotSupportedException>(() => ((IList<ValidationError>)errors).Add(new ValidationError("x", "y")));
+        Assert.Single(result.Errors);
+    }
     [Fact]
     public void CreateTrimsTheName()
     {
@@ -56,6 +88,7 @@ public class ResourceTests
         var result = Create(new string('n', 101));
 
         Assert.False(result.IsSuccess);
+        Assert.Null(result.Value);
         Assert.Equal("name", Assert.Single(result.Errors).Field);
     }
 
@@ -85,6 +118,7 @@ public class ResourceTests
         var result = Create("Room A", new string('d', 501));
 
         Assert.False(result.IsSuccess);
+        Assert.Null(result.Value);
         Assert.Equal("description", Assert.Single(result.Errors).Field);
     }
 
@@ -94,6 +128,7 @@ public class ResourceTests
         var result = Create("   ", new string('d', 501));
 
         Assert.False(result.IsSuccess);
+        Assert.Null(result.Value);
         Assert.Equal(["name", "description"], result.Errors.Select(e => e.Field).ToArray());
         Assert.All(result.Errors, e => Assert.False(string.IsNullOrWhiteSpace(e.Message)));
     }
