@@ -111,3 +111,14 @@ passed), on commit `a90c52f` (phase 3 is `1fda1ee`) - anas.m, 2026-10-18.
 Gate 3 certified (user-run): `dotnet build BookingApi.slnx --warnaserror && dotnet test
 BookingApi.slnx --no-build` run by anas.m from the repository root, `EXIT: 0` (16 of 16 tests
 passed), on commit `96a6b68` (phase 4 is `6f4a5cb`) - anas.m, 2026-10-18.
+
+### Phase 4 review decisions
+
+- **F1 amended**: a failed readiness check is logged by the framework at Error, not Warning.
+  Contract Audit section and T023 amended by the owner (anas.m, 2026-10-18); no code change.
+- **F4 amended**: SC-002 and the phase 4 Independent Test now say "database unreachable (for
+  example taken offline)" instead of "LocalDB stopped" (LocalDB restarts itself on the next
+  connection). Amended by the owner (anas.m, 2026-10-18).
+- **SC-002 verified by hand**: anas.m ran `quickstart.md` against the local LocalDB database
+  `BookingApi` on 2026-10-18; readiness answered 200 with the database up and 503 with it
+  offline (owner's report, recorded here as told).
