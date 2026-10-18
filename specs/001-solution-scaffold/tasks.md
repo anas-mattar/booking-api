@@ -132,15 +132,15 @@ details without message or stack trace, also in Development.
 
 ### Tests
 
-- [ ] T015 [P] [US3] `ProblemDetailsTests`: unknown route → 404, `application/problem+json`,
+- [x] T015 [P] [US3] `ProblemDetailsTests`: unknown route → 404, `application/problem+json`,
   `status` 404, `traceId` present
-- [ ] T016 [P] [US3] `ProblemDetailsTests`: a test-only endpoint that throws (registered by
+- [x] T016 [P] [US3] `ProblemDetailsTests`: a test-only endpoint that throws (registered by
   the test factory, not by the app) → 500 problem details; body contains neither the
   exception message nor a stack trace; asserted in Development and Production
 
 ### Implementation
 
-- [ ] T017 [US3] Add `src/BookingApi.Api/Errors/` registering `AddProblemDetails`,
+- [x] T017 [US3] Add `src/BookingApi.Api/Errors/` registering `AddProblemDetails`,
   `UseExceptionHandler` and `UseStatusCodePages` so the handler runs in every environment
 
 **Checkpoint**: gate green; US3 acceptance scenarios covered.
